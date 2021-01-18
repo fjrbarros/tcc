@@ -25,13 +25,11 @@ export default function Dashboard() {
                     <ContainerGrid className={classes.containerGrid}>
                         {
                             dadosProjetos.map(projeto => {
-                                return (
-                                    <CardProjeto
-                                        key={projeto.id}
-                                        projeto={projeto}
-                                        count={dadosProjetos.length}
-                                    />
-                                );
+                                return <CardProjeto
+                                    key={projeto.id}
+                                    projeto={projeto}
+                                    count={dadosProjetos.length}
+                                />
                             })
                         }
                     </ContainerGrid>
