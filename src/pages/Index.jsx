@@ -1,0 +1,10 @@
+export { default as Login } from './Login';
+export { default as CadastroUsuario } from './CadastroUsuario';
+export { default as RecuperarSenha } from './RecuperarSenha';
+export { default as DefaultPage } from './DefaultPage';
+export { default as Dashboard } from './Dashboard';
+export { default as ProjetoAtividade } from './projeto/Index';
+export { default as CadastroProjeto } from './projeto/Cadastro';
+export { default as TemplateProjeto } from './TemplateProjeto';
+export { default as EditarCadastro } from './EditarCadastro';
+export { default as NotFound } from './NotFound';
