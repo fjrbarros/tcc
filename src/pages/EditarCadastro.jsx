@@ -39,10 +39,6 @@ const useStyles = makeStyles(theme => ({
         marginTop: '15px'
     },
 
-    inputClass: {
-        backgroundColor: 'red'
-    },
-
     phoneInput: {
         '& button': {
             backgroundColor: 'none',

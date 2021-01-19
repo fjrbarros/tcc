@@ -14,6 +14,10 @@ import { KeyboardDatePicker, MuiPickersUtilsProvider } from "@material-ui/picker
 
 
 const useStyles = makeStyles(theme => ({
+    form: {
+        padding: '10px'
+    },
+
     formControl: {
         width: '100%'
     }
@@ -30,7 +34,7 @@ export default function CadastroProjeto() {
         <DefaultPage usaDrawer usaMenus title='Cadastro de projeto'>
             <ContainerRoot>
                 <ContainerContent>
-                    <Form>
+                    <Form className={classes.form}>
                         <TextField label='Descrição' />
                         <FormControl className={classes.formControl}>
                             <InputLabel>Tipo projeto</InputLabel>
@@ -49,14 +53,14 @@ export default function CadastroProjeto() {
                                 }
                             </Select>
                         </FormControl>
-                        <MuiPickersUtilsProvider locale={ptBR} utils={MomentUtils}>
+                        {/* <MuiPickersUtilsProvider locale={ptBR} utils={MomentUtils}>
                             <KeyboardDatePicker
                                 placeholder="Teste"
                                 value={selectedDate}
                                 onChange={date => handleDateChange(date)}
                                 format="dd/MM/yyyy"
                             />
-                        </MuiPickersUtilsProvider>
+                        </MuiPickersUtilsProvider> */}
 
                     </Form>
                 </ContainerContent>

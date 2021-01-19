@@ -10,7 +10,11 @@ const useStyles = makeStyles(theme => ({
     },
 
     containerContent: {
-        backgroundColor: 'transparent'
+        backgroundColor: 'red',
+        maxWidth: '750px',
+        '& @media(max-width:400px)': {
+            width: '100%'
+        }
     }
 }));
 
@@ -21,7 +25,7 @@ export default function Dashboard() {
     return (
         <DefaultPage usaDrawer usaMenus title='Página inicial'>
             <ContainerRoot>
-                <ContainerContent backgroundDefault maxWidth='70%' className={classes.containerContent}>
+                <ContainerContent className={classes.containerContent}>
                     <ContainerGrid className={classes.containerGrid}>
                         {
                             dadosProjetos.map(projeto => {

@@ -24,6 +24,7 @@ import Swal from 'sweetalert2';
 
 const useStyles = makeStyles(theme => ({
     card: {
+        // maxWidth: '300px',
         borderRadius: '5px',
         backgroundColor: '#fff',
         boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.12)',
