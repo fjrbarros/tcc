@@ -3,14 +3,11 @@ import { ContainerRoot, ContainerContent, ContainerCollapse, Form, TextField, Sa
 import { DefaultPage } from './Index';
 import { makeStyles, Typography, Box, Tooltip } from '@material-ui/core';
 import { useSelector } from 'react-redux';
+import { SelectField } from '../components/Index';
 import Swal from 'sweetalert2';
 import Api from '../api/Index';
 import IconButton from '@material-ui/core/IconButton';
 import AddCircleIcon from '@material-ui/icons/AddCircle';
-import InputLabel from '@material-ui/core/InputLabel';
-import MenuItem from '@material-ui/core/MenuItem';
-import FormControl from '@material-ui/core/FormControl';
-import Select from '@material-ui/core/Select';
 import AddIcon from '@material-ui/icons/Add';
 
 const useStyles = makeStyles(theme => ({
@@ -19,7 +16,7 @@ const useStyles = makeStyles(theme => ({
         height: 'calc(100vh - 60px)'
     },
 
-    formControl: {
+    selectField: {
         width: '100%'
     },
 
@@ -175,27 +172,14 @@ export default function TemplateProjeto() {
                             style={{ width: '96px' }}
                             disabled
                         />
-                        <FormControl className={classes.formControl}>
-                            <InputLabel >Tipo projeto</InputLabel>
-                            <Select
-                                name='tipoProjeto'
-                                value={values.tipoProjeto}
-                                onChange={handleChange}
-                            >
-                                {
-                                    enumTipoProjeto.map(_enum => {
-                                        return (
-                                            <MenuItem
-                                                key={_enum.valor}
-                                                value={_enum.valor}
-                                            >
-                                                {_enum.descricao}
-                                            </MenuItem>
-                                        );
-                                    })
-                                }
-                            </Select>
-                        </FormControl>
+                        <SelectField
+                            className={classes.selectField}
+                            name='tipoProjeto'
+                            data={enumTipoProjeto}
+                            label='Tipo projeto'
+                            value={values.tipoProjeto}
+                            onChange={handleChange}
+                        />
                         <TextField
                             name='descricao'
                             label='Descrição'

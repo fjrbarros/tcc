@@ -1,16 +1,14 @@
 import React, { useState } from 'react';
 import { ContainerRoot, ContainerContent, Form, TextField } from '../../components/Index';
+import { SelectField, DateField } from '../../components/Index';
 import { DefaultPage } from '../Index';
 import { useSelector } from 'react-redux';
 import { makeStyles } from '@material-ui/core';
-import FormControl from '@material-ui/core/FormControl';
-import Select from '@material-ui/core/Select';
-import InputLabel from '@material-ui/core/InputLabel';
-import MenuItem from '@material-ui/core/MenuItem';
-import { ptBR } from "date-fns/locale";
+// import moment from 'moment';
+// import 'moment/locale/pt-br';
 
-import MomentUtils from '@date-io/moment';
-import { KeyboardDatePicker, MuiPickersUtilsProvider } from "@material-ui/pickers";
+// import MomentUtils from '@date-io/moment';
+// import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
 
 
 const useStyles = makeStyles(theme => ({
@@ -18,7 +16,7 @@ const useStyles = makeStyles(theme => ({
         padding: '10px'
     },
 
-    formControl: {
+    selectField: {
         width: '100%'
     }
 }));
@@ -27,8 +25,18 @@ export default function CadastroProjeto() {
     const classes = useStyles();
     const enums = useSelector(state => state.enums);
     const enumTipoProjeto = enums.enumTipoProjeto;
+    const [values, setValues] = useState({
+        tipoProjeto: '',
+        dataInicio: new Date()
+    });
+    // const locale = moment().locale('pt-BR');
 
-    const [selectedDate, handleDateChange] = useState(new Date());
+
+    // const [selectedDate, handleDateChange] = useState(new Date());
+
+    function handleChange(event) {
+        setValues({ ...values, [event.target.name]: event.target.value });
+    }
 
     return (
         <DefaultPage usaDrawer usaMenus title='Cadastro de projeto'>
@@ -36,32 +44,20 @@ export default function CadastroProjeto() {
                 <ContainerContent>
                     <Form className={classes.form}>
                         <TextField label='Descrição' />
-                        <FormControl className={classes.formControl}>
-                            <InputLabel>Tipo projeto</InputLabel>
-                            <Select name='tipoProjeto'>
-                                {
-                                    enumTipoProjeto.map(_enum => {
-                                        return (
-                                            <MenuItem
-                                                key={_enum.valor}
-                                                value={_enum.valor}
-                                            >
-                                                {_enum.descricao}
-                                            </MenuItem>
-                                        );
-                                    })
-                                }
-                            </Select>
-                        </FormControl>
-                        {/* <MuiPickersUtilsProvider locale={ptBR} utils={MomentUtils}>
-                            <KeyboardDatePicker
-                                placeholder="Teste"
-                                value={selectedDate}
-                                onChange={date => handleDateChange(date)}
-                                format="dd/MM/yyyy"
-                            />
-                        </MuiPickersUtilsProvider> */}
-
+                        <SelectField
+                            className={classes.selectField}
+                            name='tipoProjeto'
+                            data={enumTipoProjeto}
+                            label='Tipo projeto'
+                            value={values.tipoProjeto}
+                            onChange={handleChange}
+                        />
+                        <DateField
+                            label='Teste'
+                            name='dataInicio'
+                            value={values.dataInicio}
+                            onChange={date => setValues({ ...values, dataInicio: date })}
+                        />
                     </Form>
                 </ContainerContent>
             </ContainerRoot>

@@ -9,6 +9,8 @@ export { default as Form } from './form/Form';
 export { default as EmailField } from './form/EmailField';
 export { default as PasswordField } from './form/PasswordField';
 export { default as TextField } from './form/TextField';
+export { default as SelectField } from './form/SelectField';
+export { default as DateField } from './form/DateField';
 export { default as FoneField } from './form/FoneField';
 export { default as SaveButton } from './buttons/SaveButton';
 export { default as SendButton } from './buttons/SendButton';
