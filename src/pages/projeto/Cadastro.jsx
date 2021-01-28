@@ -3,12 +3,9 @@ import { ContainerRoot, ContainerContent, Form, TextField } from '../../componen
 import { SelectField, DateField } from '../../components/Index';
 import { DefaultPage } from '../Index';
 import { useSelector } from 'react-redux';
-import { makeStyles } from '@material-ui/core';
-// import moment from 'moment';
-// import 'moment/locale/pt-br';
-
-// import MomentUtils from '@date-io/moment';
-// import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
+import { Box, makeStyles, Tooltip } from '@material-ui/core';
+import IconButton from '@material-ui/core/IconButton';
+import AddCircleIcon from '@material-ui/icons/AddCircle';
 
 
 const useStyles = makeStyles(theme => ({
@@ -27,12 +24,9 @@ export default function CadastroProjeto() {
     const enumTipoProjeto = enums.enumTipoProjeto;
     const [values, setValues] = useState({
         tipoProjeto: '',
-        dataInicio: new Date()
+        dataInicio: new Date(),
+        dataPrevistaTermino: new Date()
     });
-    // const locale = moment().locale('pt-BR');
-
-
-    // const [selectedDate, handleDateChange] = useState(new Date());
 
     function handleChange(event) {
         setValues({ ...values, [event.target.name]: event.target.value });
@@ -52,12 +46,27 @@ export default function CadastroProjeto() {
                             value={values.tipoProjeto}
                             onChange={handleChange}
                         />
-                        <DateField
-                            label='Teste'
-                            name='dataInicio'
-                            value={values.dataInicio}
-                            onChange={date => setValues({ ...values, dataInicio: date })}
-                        />
+                        <Box display='flex' justifyContent='space-between'>
+                            <DateField
+                                style={{ width: '45%' }}
+                                label='Data início'
+                                name='dataInicio'
+                                value={values.dataInicio}
+                                onChange={date => setValues({ ...values, dataInicio: date })}
+                            />
+                            <DateField
+                                style={{ width: '45%' }}
+                                label='Data prevista término'
+                                name='dataPrevistaTermino'
+                                value={values.dataPrevistaTermino}
+                                onChange={date => setValues({ ...values, dataPrevistaTermino: date })}
+                            />
+                        </Box>
+                        <Tooltip title='Envolvidos no projeto' placement='left'>
+                            <IconButton style={{ float: 'right' }}>
+                                <AddCircleIcon />
+                            </IconButton>
+                        </Tooltip>
                     </Form>
                 </ContainerContent>
             </ContainerRoot>
