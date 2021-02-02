@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import { ContainerRoot, ContainerContent, Form, TextField, SelectField, DateField, EmailField } from '../../components/Index';
 import { DefaultPage } from '../Index';
 import { useSelector } from 'react-redux';
-import { Box, makeStyles, Tooltip } from '@material-ui/core';
+import { Box, makeStyles, Tooltip, Typography } from '@material-ui/core';
 import IconButton from '@material-ui/core/IconButton';
 import AddCircleIcon from '@material-ui/icons/AddCircle';
+import DeleteIcon from '@material-ui/icons/Delete';
 
 
 import List from '@material-ui/core/List';
@@ -20,9 +21,34 @@ const useStyles = makeStyles(theme => ({
     },
 
     selectField: {
-        width: '100%',
-        marginTop: '16px',
-        marginBottom: '8px',
+        width: '100%'
+    },
+
+    inputIntegrantes: {
+        width: '44%',
+        margin: 0,
+        '& div': {
+            width: '100%'
+        }
+    },
+
+    listEnvolvidos: {
+        margin: 0,
+        padding: 0,
+        marginTop: '-10px',
+        '& li': {
+            padding: 0
+        }
+    },
+
+    labelIntegrantes: {
+        fontSize: '1.2rem',
+        fontStyle: 'italic',
+        color: '#545454'
+    },
+
+    buttonIntegrantes: {
+        marginBottom: '-24px'
     }
 }));
 
@@ -31,7 +57,7 @@ function defaultValues() {
         tipoProjeto: '',
         dataInicio: new Date(),
         dataPrevistaTermino: new Date(),
-        membros: [{ id: 1, nome: 'teste' }, { id: 2, nome: 'teste 2' }]
+        envolvidos: [{ id: 1, nome: 'teste' }, { id: 2, nome: 'teste 2' }]
     }
 }
 
@@ -75,31 +101,45 @@ export default function CadastroProjeto() {
                                 onChange={date => setValues({ ...values, dataPrevistaTermino: date })}
                             />
                         </Box>
-                        <Box display='flex' justifyContent='flex-end'>
-                            <EmailField label='E-mail' style={{ marginRight: '5px' }} />
-                            <SelectField
-                                className={classes.selectField}
-                                name='tipoProjeto'
-                                data={enumTipoProjeto}
-                                label='Tipo projeto'
-                                value={values.tipoProjeto}
-                                onChange={handleChange}
-                            />
-                            <Tooltip title='Envolvidos no projeto' placement='left'>
-                                <IconButton>
-                                    <AddCircleIcon />
-                                </IconButton>
-                            </Tooltip>
+                        <Box display='flex' justifyContent='flex-end' alignItems='center'>
+                            <Typography className={classes.labelIntegrantes}>
+                                Envolvidos no projeto
+                            </Typography>
+                            <IconButton>
+                                <AddCircleIcon />
+                            </IconButton>
                         </Box>
-                        <List >
+                        <List className={classes.listEnvolvidos}>
                             {
-                                values.membros.map(item => {
+                                values.envolvidos.map(item => {
                                     return (
-                                        <ListItem
-                                            key={item.id}
-                                        >
-                                            <ListItemIcon><BookmarkBorderIcon /></ListItemIcon>
-                                            <ListItemText>{item.nome}</ListItemText>
+                                        <ListItem key={item.id}>
+                                            <Box
+                                                display='flex'
+                                                justifyContent='space-between'
+                                                alignItems='center'
+                                                width='100%'
+                                                padding='5px 0'
+                                            >
+                                                <EmailField
+                                                    label='E-mail'
+                                                    className={classes.inputIntegrantes}
+                                                />
+                                                <SelectField
+                                                    className={classes.inputIntegrantes}
+                                                    // className={classes.selectIntegrantes}
+                                                    // name='tipoProjeto'
+                                                    data={enumTipoProjeto}
+                                                    label='Tipo projeto'
+                                                // value={values.tipoProjeto}
+                                                // onChange={handleChange}
+                                                />
+                                                <Tooltip title='Remover' placement='left'>
+                                                    <IconButton className={classes.buttonIntegrantes}>
+                                                        <DeleteIcon />
+                                                    </IconButton>
+                                                </Tooltip>
+                                            </Box>
                                         </ListItem>
                                     )
                                 })
