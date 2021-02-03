@@ -1,19 +1,22 @@
-import React, { useState } from 'react';
-import { ContainerRoot, ContainerContent, Form, TextField, SelectField, DateField, EmailField } from '../../components/Index';
+import React, { useEffect, useState } from 'react';
+import {
+    ContainerRoot,
+    ContainerContent,
+    Form,
+    TextField,
+    SelectField,
+    DateField,
+    EmailField,
+    SaveButton
+} from '../../components/Index';
 import { DefaultPage } from '../Index';
 import { useSelector } from 'react-redux';
 import { Box, makeStyles, Tooltip, Typography } from '@material-ui/core';
 import IconButton from '@material-ui/core/IconButton';
 import AddCircleIcon from '@material-ui/icons/AddCircle';
 import DeleteIcon from '@material-ui/icons/Delete';
-
-
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
-import ListItemText from '@material-ui/core/ListItemText';
-import BookmarkBorderIcon from '@material-ui/icons/BookmarkBorder';
-
 
 const useStyles = makeStyles(theme => ({
     form: {
@@ -48,16 +51,28 @@ const useStyles = makeStyles(theme => ({
     },
 
     buttonIntegrantes: {
-        marginBottom: '-24px'
+        marginBottom: '-24px',
+        padding: '10px',
+        '& svg': {
+            fontSize: '1.2rem'
+        }
+    },
+
+    saveButton: {
+        margin: '10px 0',
+        marginLeft: '50%',
+        transform: 'translate(-50%)'
     }
 }));
 
-function defaultValues() {
+function defaultValues(idUsuario) {
     return {
+        idUsuario,
+        descricao: '',
         tipoProjeto: '',
         dataInicio: new Date(),
         dataPrevistaTermino: new Date(),
-        envolvidos: [{ id: 1, nome: 'teste' }, { id: 2, nome: 'teste 2' }]
+        membros: []
     }
 }
 
@@ -65,10 +80,53 @@ export default function CadastroProjeto() {
     const classes = useStyles();
     const enums = useSelector(state => state.enums);
     const enumTipoProjeto = enums.enumTipoProjeto;
-    const [values, setValues] = useState(defaultValues());
+    const enumPerfilMembroProjeto = enums.enumPerfilMembroProjeto;
+    const idUsuario = useSelector(state => state.usuario.dadosUsuario.id);
+    const [values, setValues] = useState(defaultValues(idUsuario));
 
     function handleChange(event) {
         setValues({ ...values, [event.target.name]: event.target.value });
+    }
+
+    function adicionaEnvolvidoProjeto() {
+        const newArraymembros = [...values.membros];
+
+        newArraymembros.push({ emailMembro: '', perfilMembro: '' });
+
+        setValues({ ...values, membros: newArraymembros });
+    }
+
+    function handleChangeMembro(event, index) {
+        const newArraymembros = [...values.membros];
+
+        newArraymembros[index][event.target.name] = event.target.value;
+
+        setValues({ ...values, membros: newArraymembros });
+    }
+
+    function removeMembro(membro, index) {
+        if (membro.id) {
+            removeMembroApi(membro);
+            return;
+        }
+
+        removeMembroProjeto(membro);
+    }
+
+    function removeMembroApi(membro) {
+        alert();
+    }
+
+    function removeMembroProjeto(membro) {
+        let newArraymembros = [...values.membros];
+
+        newArraymembros = newArraymembros.filter(item => item !== membro);
+
+        setValues({ ...values, membros: newArraymembros });
+    }
+
+    function salvarProjeto() {
+
     }
 
     return (
@@ -76,7 +134,18 @@ export default function CadastroProjeto() {
             <ContainerRoot>
                 <ContainerContent>
                     <Form className={classes.form}>
-                        <TextField label='Descrição' />
+                        <TextField
+                            label='Código usuário'
+                            value={values.idUsuario}
+                            style={{ width: '96px' }}
+                            disabled
+                        />
+                        <TextField
+                            label='Descrição'
+                            name='descricao'
+                            value={values.descricao}
+                            onChange={handleChange}
+                        />
                         <SelectField
                             className={classes.selectField}
                             name='tipoProjeto'
@@ -105,15 +174,15 @@ export default function CadastroProjeto() {
                             <Typography className={classes.labelIntegrantes}>
                                 Envolvidos no projeto
                             </Typography>
-                            <IconButton>
+                            <IconButton onClick={adicionaEnvolvidoProjeto}>
                                 <AddCircleIcon />
                             </IconButton>
                         </Box>
                         <List className={classes.listEnvolvidos}>
                             {
-                                values.envolvidos.map(item => {
+                                values.membros.map((item, index) => {
                                     return (
-                                        <ListItem key={item.id}>
+                                        <ListItem key={item.id || `key-${index}`}>
                                             <Box
                                                 display='flex'
                                                 justifyContent='space-between'
@@ -124,18 +193,23 @@ export default function CadastroProjeto() {
                                                 <EmailField
                                                     label='E-mail'
                                                     className={classes.inputIntegrantes}
+                                                    name='emailMembro'
+                                                    value={item.emailMembro}
+                                                    onChange={e => handleChangeMembro(e, index)}
                                                 />
                                                 <SelectField
                                                     className={classes.inputIntegrantes}
-                                                    // className={classes.selectIntegrantes}
-                                                    // name='tipoProjeto'
-                                                    data={enumTipoProjeto}
-                                                    label='Tipo projeto'
-                                                // value={values.tipoProjeto}
-                                                // onChange={handleChange}
+                                                    data={enumPerfilMembroProjeto}
+                                                    label='Perfil membro'
+                                                    name='perfilMembro'
+                                                    value={item.perfilMembro}
+                                                    onChange={e => handleChangeMembro(e, index)}
                                                 />
                                                 <Tooltip title='Remover' placement='left'>
-                                                    <IconButton className={classes.buttonIntegrantes}>
+                                                    <IconButton
+                                                        className={classes.buttonIntegrantes}
+                                                        onClick={() => removeMembro(item, index)}
+                                                    >
                                                         <DeleteIcon />
                                                     </IconButton>
                                                 </Tooltip>
@@ -145,6 +219,12 @@ export default function CadastroProjeto() {
                                 })
                             }
                         </List>
+                        <SaveButton
+                            className={classes.saveButton}
+                            text='Salvar'
+                            width='50%'
+                            onClick={salvarProjeto}
+                        />
                     </Form>
                 </ContainerContent>
             </ContainerRoot>
