@@ -26,6 +26,7 @@ import MenuItem from '@material-ui/core/MenuItem';
 import MenuList from '@material-ui/core/MenuList';
 import Swal from 'sweetalert2';
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
+import { atualizaDadosProjeto } from '../../redux/user/Actions';
 
 const useStyles = makeStyles(theme => ({
     appBar: {
@@ -107,6 +108,10 @@ const useStyles = makeStyles(theme => ({
         '& div ul li:hover': {
             backgroundColor: 'rgb(0,0,0,0.8)'
         }
+    },
+
+    containerSwal: {
+        zIndex: 999999
     }
 }));
 
@@ -165,13 +170,19 @@ export default function AppBar(props) {
             confirmButtonColor: '#3085d6',
             cancelButtonColor: '#d33',
             confirmButtonText: 'Sim',
-            cancelButtonText: 'Não'
+            cancelButtonText: 'Não',
+            customClass: { container: `${classes.containerSwal}` },
         }).then((result) => {
             if (result.isConfirmed) {
                 history.push('/');
                 removeCookie();
+                resetDadosSistema();
             }
         })
+    }
+
+    function resetDadosSistema() {
+        dispatch(Object.assign(atualizaDadosProjeto(), { data: [] }));
     }
 
     return (

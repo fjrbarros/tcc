@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import { useSelector } from 'react-redux';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+import { makeStyles, Box, Typography } from '@material-ui/core';
 import Api from '../../api/Index';
 import Swal from 'sweetalert2';
-import { makeStyles, Box, Typography } from '@material-ui/core';
 
 const useStyles = makeStyles(theme => ({
     container: {
@@ -62,7 +63,7 @@ const getItemStyle = (isDragging, draggableStyle) => ({
 
 function getListStyle(isDraggingOver, text) {
     let color = '';
-    if (text === 'TO_DO') color = '#efc100';
+    if (text === 'TO DO') color = '#efc100';
     if (text === 'DOING') color = '#0ac';
     if (text === 'DONE') color = '#0b0';
 
@@ -81,19 +82,14 @@ export default function Atividade(props) {
     const [atividade, setAtividade] = useState({ to_do: [], doing: [], done: [] });
     const idList = { to_do: 'to_do', doing: 'doing', done: 'done' };
     const classes = useStyles();
+    const idUsuario = useSelector(state => state.usuario.dadosUsuario.id);
 
     useEffect(() => {
         Api.get(`/projeto/${projeto.id}/atividades`
         ).then(resp => {
             organizaDados(resp.data);
         }).catch(error => {
-            Swal.fire({
-                title: 'Erro!',
-                text: `${error.response ? error.response.data.message : error.message}`,
-                icon: 'error',
-                confirmButtonColor: '#3085d6',
-                confirmButtonText: 'Ok'
-            });
+            showMessageError(`${error.response ? error.response.data.message : error.message}`);
         });
     }, [projeto.id]);
 
@@ -110,9 +106,37 @@ export default function Atividade(props) {
     }
 
     function onDragEnd(result) {
-        const { source, destination } = result;
+        if (!projeto.id) {
+            showMessageError('Id do projeto não encontrado!');
+            return;
+        };
 
-        if (!destination) return;
+        const idAtividade = result.draggableId;
+
+        if (!idAtividade) {
+            showMessageError('Id da atividade não encontrado!');
+            return;
+        };
+
+        const destino = result.destination.droppableId;
+
+        if (!destino) {
+            showMessageError('Destino da atividade não encontrado!');
+            return;
+        };
+
+        Api.post(`/projeto/${projeto.id}/atividade/${idAtividade}/estagio`, {
+            estagioDestino: destino.toUpperCase(),
+            idUsuario: idUsuario
+        })
+            .then(() => atualizaAtividade(result))
+            .catch(error => {
+                showMessageError(`${error.response ? error.response.data.message : error.message}`);
+            });
+    }
+
+    function atualizaAtividade(result) {
+        const { source, destination } = result;
 
         if (source.droppableId === destination.droppableId) {
             const newList = reorder(
@@ -151,16 +175,15 @@ export default function Atividade(props) {
         });
     }
 
-    if (naoPossuiAtividades()) {
-        return (
-            <Box className={classes.containerSemAtividade}>
-                <Typography>Este projeto não contém Atividades!</Typography>
-            </Box>
-        );
-    }
-
-    function naoPossuiAtividades() {
-        return atividade.to_do.length === 0 && atividade.doing.length === 0 && atividade.done.length === 0;
+    function showMessageError(msg) {
+        Swal.fire({
+            title: 'Erro!',
+            text: msg,
+            icon: 'error',
+            customClass: { container: 'msg-container' },
+            confirmButtonColor: '#3085d6',
+            confirmButtonText: 'Ok'
+        });
     }
 
     function defaultProps(item) {
@@ -181,7 +204,7 @@ export default function Atividade(props) {
 
     function getHeaderColumn(text) {
         let background = '';
-        if (text === 'TO_DO') background = '#efc100';
+        if (text === 'TO DO') background = '#efc100';
         if (text === 'DOING') background = '#0ac';
         if (text === 'DONE') background = '#0b0';
 
@@ -189,6 +212,7 @@ export default function Atividade(props) {
             <Box style={{
                 padding: '15px 10px',
                 textAlign: 'center',
+                margin: '-1px -1px 0 -1px',
                 borderTopLeftRadius: '7px',
                 borderTopRightRadius: '7px',
                 backgroundColor: background,
@@ -196,7 +220,7 @@ export default function Atividade(props) {
             }}>
                 <Typography>{text}</Typography>
             </Box>
-        ); 
+        );
     }
 
     return (
@@ -204,14 +228,15 @@ export default function Atividade(props) {
             <Box className={classes.container}>
                 <Droppable droppableId='to_do'>
                     {(provided, snapshot) => (
-                        <Box style={getListStyle(snapshot.isDraggingOver, 'TO_DO')}>
-                            { getHeaderColumn('TO_DO')}
+                        <Box style={getListStyle(snapshot.isDraggingOver, 'TO DO')}>
+                            { getHeaderColumn('TO DO')}
                             <Box padding='5px 5px 0px' height='100%' ref={provided.innerRef}>
                                 {atividade.to_do.map((item, index) => (
                                     <Draggable
                                         key={item.id.toString()}
                                         draggableId={item.id.toString()}
                                         index={index}
+                                        item={item}
                                     >
                                         {defaultProps(item)}
                                     </Draggable>

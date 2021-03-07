@@ -6,7 +6,7 @@ const useStyles = makeStyles(theme => ({
         width: '100%',
         maxWidth: props => props.maxWidth ? props.maxWidth : '600px',
         margin: '0 auto',
-        backgroundColor: '#ffffff'
+        // backgroundColor: '#ffffff'
     }
 }));
 

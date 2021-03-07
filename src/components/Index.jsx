@@ -19,3 +19,4 @@ export { default as EditButton } from './buttons/EditButton';
 export { default as Chat } from './containers/chat/Chat';
 export { default as NavigateProjetos } from './containers/NavigateProjetos';
 export { default as Tabpanel } from './tabpanel/Tabpanel';
+export {default as Modal} from './modal/Modal';

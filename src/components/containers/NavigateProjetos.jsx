@@ -15,7 +15,7 @@ const useStyles = makeStyles(theme => ({
     drawer: {
         marginTop: theme.appHeader.toolbar.height + 4,
         color: '#545454',
-        backgroundColor: theme.containerDefault.backgroundColor
+        backgroundColor: '#ffffff'
     },
 
     containerHeader: {
@@ -36,7 +36,7 @@ const useStyles = makeStyles(theme => ({
         borderRadius: '5px',
         marginBottom: '10px',
         cursor: 'pointer',
-        boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.12)',
+        boxShadow: '2px 2px 2px 0 rgba(0, 0, 0, 0.12)',
         transition: 'box-shadow 0.2s ease-in-out',
         '&:hover': {
             boxShadow: '0px 5px 15px 0px rgba(0, 0, 0, 0.2)'

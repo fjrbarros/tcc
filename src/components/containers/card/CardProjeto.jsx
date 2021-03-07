@@ -27,7 +27,7 @@ const useStyles = makeStyles(theme => ({
         // maxWidth: '300px',
         borderRadius: '5px',
         backgroundColor: '#fff',
-        boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.12)',
+        boxShadow: '2px 2px 2px 0 rgba(0, 0, 0, 0.12)',
         transition: 'box-shadow 0.2s ease-in-out',
         display: 'flex',
         flexDirection: 'column',

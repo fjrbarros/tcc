@@ -8,14 +8,32 @@ export function validaForm(values, errorFn) {
     }
 
     if (values.hasOwnProperty('nome')) {
-        if ((msg = validaNome(values.nome))) {
+        if ((msg = validaTextoSimples(values.nome, 'Nome'))) {
             errorFn('nome', msg)
         }
     }
 
     if (values.hasOwnProperty('senha')) {
-        if ((msg = validaSenha(values.senha))) {
+        if ((msg = validaTextoSimples(values.senha, 'Senha'))) {
             errorFn('senha', msg)
+        }
+    }
+
+    if (values.hasOwnProperty('confirmacaoSenha')) {
+        if ((msg = validaTextoSimples(values.confirmacaoSenha, 'Confirmação de senha'))) {
+            errorFn('confirmacaoSenha', msg)
+        }
+    }
+
+    if (values.hasOwnProperty('descricao')) {
+        if ((msg = validaTextoSimples(values.descricao, 'Descrição'))) {
+            errorFn('descricao', msg)
+        }
+    }
+
+    if (values.hasOwnProperty('idTemplateProjeto')) {
+        if ((msg = validaTextoSimples(values.idTemplateProjeto, 'Tipo projeto'))) {
+            errorFn('idTemplateProjeto', msg)
         }
     }
 }
@@ -35,18 +53,9 @@ function validaEmail(email) {
     return '';
 }
 
-
-function validaSenha(senha) {
-    if (!senha) {
-        return 'Senha é obrigatório!';
-    }
-
-    return '';
-}
-
-function validaNome(nome) {
-    if (!nome.trim()) {
-        return 'Nome é obrigatório!';
+function validaTextoSimples(nome, texto) {
+    if (!nome.toString().trim()) {
+        return `${texto} é obrigatório!`;
     }
 
     return '';

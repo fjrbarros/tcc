@@ -103,10 +103,6 @@ const useStyles = makeStyles(theme => ({
         height: '100px',
         width: '80px',
         margin: '10px auto 0'
-    },
-
-    containerErrors: {
-        marginBottom: '10px'
     }
 }));
 

@@ -54,7 +54,7 @@ const theme = {
         }
     },
     containerDefault: {
-        backgroundColor: '#ededed'
+        backgroundColor: '#f9f9f9'
     }
 };
 

@@ -10,7 +10,6 @@ const useStyles = makeStyles(theme => ({
     },
 
     containerContent: {
-        backgroundColor: 'red',
         maxWidth: '750px',
         '& @media(max-width:400px)': {
             width: '100%'

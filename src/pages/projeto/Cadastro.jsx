@@ -12,19 +12,19 @@ import {
 import { DefaultPage } from '../Index';
 import { useSelector } from 'react-redux';
 import { Box, makeStyles, Tooltip, Typography } from '@material-ui/core';
+import { validaForm } from '../../util/ValidaForm';
 import IconButton from '@material-ui/core/IconButton';
 import AddCircleIcon from '@material-ui/icons/AddCircle';
 import DeleteIcon from '@material-ui/icons/Delete';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
+import Api from '../../api/Index';
+import Swal from 'sweetalert2';
+import moment from 'moment';
 
 const useStyles = makeStyles(theme => ({
     form: {
         padding: '10px'
-    },
-
-    selectField: {
-        width: '100%'
     },
 
     inputIntegrantes: {
@@ -69,9 +69,10 @@ function defaultValues(idUsuario) {
     return {
         idUsuario,
         descricao: '',
-        tipoProjeto: '',
+        idTemplateProjeto: '',
         dataInicio: new Date(),
         dataPrevistaTermino: new Date(),
+        tipoProjeto: '',
         membros: []
     }
 }
@@ -79,10 +80,25 @@ function defaultValues(idUsuario) {
 export default function CadastroProjeto() {
     const classes = useStyles();
     const enums = useSelector(state => state.enums);
-    const enumTipoProjeto = enums.enumTipoProjeto;
     const enumPerfilMembroProjeto = enums.enumPerfilMembroProjeto;
     const idUsuario = useSelector(state => state.usuario.dadosUsuario.id);
     const [values, setValues] = useState(defaultValues(idUsuario));
+    const [errors, setErrors] = useState(defaultValues());
+    const [disabledButton, setDisabledButton] = useState(false);
+
+    const [teste, setTeste] = useState([]);
+
+    useEffect(() => {
+        Api.get(`/templateProjeto/usuario/${idUsuario}`)
+            .then(resp => {
+                const data = [];
+                resp.data.forEach(item => {
+                    data.push({ valor: item.id, descricao: item.descricao, tipoProjeto: item.tipoProjeto });
+                })
+                setTeste(data);
+            })
+            .catch(error => showMsgError(`${error.response ? error.response.data.message : error.message}`));
+    }, [idUsuario])
 
     function handleChange(event) {
         setValues({ ...values, [event.target.name]: event.target.value });
@@ -125,15 +141,68 @@ export default function CadastroProjeto() {
         setValues({ ...values, membros: newArraymembros });
     }
 
-    function salvarProjeto() {
+    function handleSubmit() {
+        setDisabledButton(true);
+        const errors = {};
+        validaForm({
+            descricao: values.descricao,
+            idTemplateProjeto: values.idTemplateProjeto,
+        }, (campo, msg) => errors[campo] = msg);
+        setErrors(errors);
+        if (Object.keys(errors).length === 0) {
+            cadastraProjeto();
+        } else {
+            setDisabledButton(false);
+        }
+    }
 
+    function cadastraProjeto() {
+        const tipoProjeto = teste.filter(item => item.valor === values.idTemplateProjeto)[0].tipoProjeto;
+        values.tipoProjeto = tipoProjeto;
+        values.dataInicio = moment(values.dataInicio).format('DD/MM/YYYY');
+        values.dataPrevistaTermino = moment(values.dataPrevistaTermino).format('DD/MM/YYYY');
+        Api.post('/projeto', values)
+            .then(() => {
+                Swal.fire({
+                    toast: true,
+                    icon: 'success',
+                    title: 'Dados salvos com sucesso!',
+                    showClass: false,
+                    position: 'top',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    timerProgressBar: true,
+                    customClass: { container: 'toast-container' },
+                    didOpen: toast => {
+                        toast.addEventListener('mouseenter', Swal.stopTimer)
+                        toast.addEventListener('mouseleave', Swal.resumeTimer)
+                    }
+                });
+                setValues(defaultValues(idUsuario));
+                setDisabledButton(false);
+            })
+            .catch(error => {
+                setDisabledButton(false);
+                showMsgError(`${error.response ? error.response.data.message : error.message}`);
+            });
+    }
+
+    function showMsgError(msg) {
+        Swal.fire({
+            title: 'Erro!',
+            text: msg,
+            icon: 'error',
+            confirmButtonColor: '#3085d6',
+            confirmButtonText: 'Ok',
+            customClass: { container: 'msg-container' }
+        });
     }
 
     return (
         <DefaultPage usaDrawer usaMenus title='Cadastro de projeto'>
             <ContainerRoot>
                 <ContainerContent>
-                    <Form className={classes.form}>
+                    <Form onSubmit={handleSubmit} className={classes.form}>
                         <TextField
                             label='Código usuário'
                             value={values.idUsuario}
@@ -145,14 +214,16 @@ export default function CadastroProjeto() {
                             name='descricao'
                             value={values.descricao}
                             onChange={handleChange}
+                            error={!!errors.descricao}
+                            helperText={errors.descricao}
                         />
                         <SelectField
-                            className={classes.selectField}
-                            name='tipoProjeto'
-                            data={enumTipoProjeto}
+                            name='idTemplateProjeto'
+                            data={teste}
                             label='Tipo projeto'
-                            value={values.tipoProjeto}
+                            value={values.idTemplateProjeto}
                             onChange={handleChange}
+                            error={errors.idTemplateProjeto}
                         />
                         <Box display='flex' justifyContent='space-between'>
                             <DateField
@@ -222,8 +293,9 @@ export default function CadastroProjeto() {
                         <SaveButton
                             className={classes.saveButton}
                             text='Salvar'
+                            type='submit'
                             width='50%'
-                            onClick={salvarProjeto}
+                            disabled={disabledButton}
                         />
                     </Form>
                 </ContainerContent>
