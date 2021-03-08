@@ -10,10 +10,7 @@ const useStyles = makeStyles(theme => ({
     },
 
     containerContent: {
-        maxWidth: '750px',
-        '& @media(max-width:400px)': {
-            width: '100%'
-        }
+        maxWidth: '100%'
     }
 }));
 

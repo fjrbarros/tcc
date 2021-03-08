@@ -106,36 +106,6 @@ export default function Atividade(props) {
     }
 
     function onDragEnd(result) {
-        if (!projeto.id) {
-            showMessageError('Id do projeto não encontrado!');
-            return;
-        };
-
-        const idAtividade = result.draggableId;
-
-        if (!idAtividade) {
-            showMessageError('Id da atividade não encontrado!');
-            return;
-        };
-
-        const destino = result.destination.droppableId;
-
-        if (!destino) {
-            showMessageError('Destino da atividade não encontrado!');
-            return;
-        };
-
-        Api.post(`/projeto/${projeto.id}/atividade/${idAtividade}/estagio`, {
-            estagioDestino: destino.toUpperCase(),
-            idUsuario: idUsuario
-        })
-            .then(() => atualizaAtividade(result))
-            .catch(error => {
-                showMessageError(`${error.response ? error.response.data.message : error.message}`);
-            });
-    }
-
-    function atualizaAtividade(result) {
         const { source, destination } = result;
 
         if (source.droppableId === destination.droppableId) {
@@ -168,11 +138,29 @@ export default function Atividade(props) {
             destination
         );
 
+        const copyAtividade = {
+            to_do: atividade.to_do,
+            doing: atividade.doing,
+            done: atividade.done
+        };
+
         setAtividade({
             to_do: newResult.to_do || atividade.to_do,
             doing: newResult.doing || atividade.doing,
             done: newResult.done || atividade.done
         });
+
+        const idAtividade = result.draggableId;
+        const destino = destination.droppableId;
+
+        Api.post(`/projeto/${projeto.id}/atividade/${idAtividade}/estagio`, {
+            estagioDestino: destino.toUpperCase(),
+            idUsuario: idUsuario
+        })
+            .catch(error => {
+                showMessageError(`${error.response ? error.response.data.message : error.message}`);
+                setAtividade(copyAtividade);
+            });
     }
 
     function showMessageError(msg) {

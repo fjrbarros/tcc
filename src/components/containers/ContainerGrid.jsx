@@ -4,9 +4,12 @@ import { makeStyles, Box } from '@material-ui/core';
 const useStyles = makeStyles(theme => ({
     contentGrid: {
         display: 'grid',
-        // gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-        gridTemplateColumns: 'repeat(auto-fit, 300px)',
-        gridGap: '15px'
+        gridTemplateColumns: 'minmax(200px, 1fr) minmax(200px, 1fr) minmax(200px, 1fr) minmax(200px, 1fr)',
+        gridGap: '15px',
+        '& @media(max-width:900px)': {
+            background: 'red',
+            gridTemplateColumns: 'minmax(200px, 1fr) minmax(200px, 1fr) minmax(200px, 1fr)',
+        }
     }
 }));
 
