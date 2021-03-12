@@ -21,6 +21,7 @@ export default function SelectField(props) {
                     <em>Selecione</em>
                 </MenuItem>
                 {
+                    data.length > 0 &&
                     data.map((item, index) => {
                         return (
                             <MenuItem

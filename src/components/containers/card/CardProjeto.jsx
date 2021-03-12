@@ -113,7 +113,7 @@ const BorderLinearProgress = withStyles((theme) => ({
         height: 10,
         borderRadius: 5,
         marginLeft: '5px',
-        width: '50%'
+        flex: 1
     },
     colorPrimary: {
         backgroundColor: theme.palette.grey[theme.palette.type === 'light' ? 200 : 700],
@@ -121,6 +121,7 @@ const BorderLinearProgress = withStyles((theme) => ({
     bar: {
         borderRadius: 5,
         backgroundColor: '#1a90ff',
+        flex: 1
     },
 }))(LinearProgress);
 
@@ -138,6 +139,13 @@ export default function CardProjeto(props) {
     function abrirProjeto() {
         history.push({
             pathname: '/projeto-atividade',
+            state: { projeto }
+        });
+    }
+
+    function editarProjeto() {
+        history.push({
+            pathname: '/projeto-cadastro',
             state: { projeto }
         });
     }
@@ -165,7 +173,7 @@ export default function CardProjeto(props) {
             showClass: false,
             position: 'top',
             showConfirmButton: false,
-            timer: 3000,
+            timer: 2000,
             timerProgressBar: true,
             customClass: { container: 'toast-container' },
             didOpen: toast => {
@@ -237,7 +245,7 @@ export default function CardProjeto(props) {
             </Box>
             <Box className={classes.cardList}>
                 <List className={classes.list}>
-                    <ListItem>
+                    <ListItem onClick={editarProjeto}>
                         <ListItemIcon><EditIcon /></ListItemIcon>
                         <ListItemText>Editar projeto</ListItemText>
                     </ListItem>

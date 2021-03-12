@@ -6,9 +6,14 @@ const useStyles = makeStyles(theme => ({
         display: 'grid',
         gridTemplateColumns: 'minmax(200px, 1fr) minmax(200px, 1fr) minmax(200px, 1fr) minmax(200px, 1fr)',
         gridGap: '15px',
-        '& @media(max-width:900px)': {
-            background: 'red',
+        '@media(max-width:900px)': {
             gridTemplateColumns: 'minmax(200px, 1fr) minmax(200px, 1fr) minmax(200px, 1fr)',
+        },
+        '@media(max-width:650px)': {
+            gridTemplateColumns: 'minmax(200px, 1fr) minmax(200px, 1fr)',
+        },
+        '@media(max-width:435px)': {
+            gridTemplateColumns: 'minmax(200px, 1fr)',
         }
     }
 }));

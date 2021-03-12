@@ -68,6 +68,7 @@ const useStyles = makeStyles(theme => ({
 function defaultValues(idUsuario) {
     return {
         idUsuario,
+        id: null,
         descricao: '',
         idTemplateProjeto: '',
         dataInicio: new Date(),
@@ -77,16 +78,16 @@ function defaultValues(idUsuario) {
     }
 }
 
-export default function CadastroProjeto() {
+export default function CadastroProjeto(props) {
     const classes = useStyles();
     const enums = useSelector(state => state.enums);
     const enumPerfilMembroProjeto = enums.enumPerfilMembroProjeto;
     const idUsuario = useSelector(state => state.usuario.dadosUsuario.id);
+    const projeto = props.location.state;
     const [values, setValues] = useState(defaultValues(idUsuario));
     const [errors, setErrors] = useState(defaultValues());
     const [disabledButton, setDisabledButton] = useState(false);
-
-    const [teste, setTeste] = useState([]);
+    const [tipoTemplate, setTipoTemplate] = useState([]);
 
     useEffect(() => {
         Api.get(`/templateProjeto/usuario/${idUsuario}`)
@@ -95,10 +96,26 @@ export default function CadastroProjeto() {
                 resp.data.forEach(item => {
                     data.push({ valor: item.id, descricao: item.descricao, tipoProjeto: item.tipoProjeto });
                 })
-                setTeste(data);
+                setTipoTemplate(data);
             })
             .catch(error => showMsgError(`${error.response ? error.response.data.message : error.message}`));
-    }, [idUsuario])
+    }, [idUsuario]);
+
+    useEffect(() => {
+        if (!projeto) return;
+
+        setValues({
+            idUsuario,
+            id: projeto.id,
+            descricao: projeto.descricao,
+            idTemplateProjeto: projeto.idTemplateProjeto,
+            dataInicio: projeto.dataInicio,
+            dataPrevistaTermino: projeto.dataPrevistaTermino,
+            tipoProjeto: projeto.tipoProjeto,
+            membros: projeto.membros || []
+        });
+    }, [projeto, idUsuario]);
+
 
     function handleChange(event) {
         setValues({ ...values, [event.target.name]: event.target.value });
@@ -157,27 +174,13 @@ export default function CadastroProjeto() {
     }
 
     function cadastraProjeto() {
-        const tipoProjeto = teste.filter(item => item.valor === values.idTemplateProjeto)[0].tipoProjeto;
+        const tipoProjeto = tipoTemplate.filter(item => item.valor === values.idTemplateProjeto)[0].tipoProjeto;
         values.tipoProjeto = tipoProjeto;
         values.dataInicio = moment(values.dataInicio).format('DD/MM/YYYY');
         values.dataPrevistaTermino = moment(values.dataPrevistaTermino).format('DD/MM/YYYY');
         Api.post('/projeto', values)
             .then(() => {
-                Swal.fire({
-                    toast: true,
-                    icon: 'success',
-                    title: 'Dados salvos com sucesso!',
-                    showClass: false,
-                    position: 'top',
-                    showConfirmButton: false,
-                    timer: 3000,
-                    timerProgressBar: true,
-                    customClass: { container: 'toast-container' },
-                    didOpen: toast => {
-                        toast.addEventListener('mouseenter', Swal.stopTimer)
-                        toast.addEventListener('mouseleave', Swal.resumeTimer)
-                    }
-                });
+                showToast('Dados salvos com sucesso!');
                 setValues(defaultValues(idUsuario));
                 setDisabledButton(false);
             })
@@ -185,6 +188,24 @@ export default function CadastroProjeto() {
                 setDisabledButton(false);
                 showMsgError(`${error.response ? error.response.data.message : error.message}`);
             });
+    }
+
+    function showToast(msg) {
+        Swal.fire({
+            toast: true,
+            icon: 'success',
+            title: msg,
+            showClass: false,
+            position: 'top',
+            showConfirmButton: false,
+            timer: 2000,
+            timerProgressBar: true,
+            customClass: { container: 'toast-container' },
+            didOpen: toast => {
+                toast.addEventListener('mouseenter', Swal.stopTimer)
+                toast.addEventListener('mouseleave', Swal.resumeTimer)
+            }
+        });
     }
 
     function showMsgError(msg) {
@@ -219,7 +240,7 @@ export default function CadastroProjeto() {
                         />
                         <SelectField
                             name='idTemplateProjeto'
-                            data={teste}
+                            data={tipoTemplate}
                             label='Tipo projeto'
                             value={values.idTemplateProjeto}
                             onChange={handleChange}
