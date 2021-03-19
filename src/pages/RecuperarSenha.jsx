@@ -1,30 +1,22 @@
 import React, { useState } from 'react';
 import { ContainerRoot, ContainerContent, Form, EmailField, SendButton } from '../components/Index';
 import { DefaultPage } from './Index';
-import { Box, makeStyles } from '@material-ui/core';
+import { Typography, makeStyles } from '@material-ui/core';
 import { validaForm } from '../util/ValidaForm';
 import Api from '../api/Index';
 import Swal from 'sweetalert2';
 
 const useStyles = makeStyles(theme => ({
-    container: {
-        display: 'flex',
-        flexDirection: 'column',
-        height: '100%'
-    },
-
     form: {
         padding: '10px',
+        textAlign: 'center'
+    },
+
+    texto: {
+        marginTop: '15px',
+        fontSize: '17px',
         textAlign: 'center',
-        flex: 1
-    },
-
-    sendButton: {
-        marginTop: '15px'
-    },
-
-    flex: {
-        flex: 1
+        color: 'rgba(0, 0, 0, 0.54)'
     }
 }));
 
@@ -77,7 +69,7 @@ export default function RecuperarSenha() {
             showClass: false,
             position: 'top',
             showConfirmButton: false,
-            timer: 3000,
+            timer: 2000,
             timerProgressBar: true,
             customClass: { container: 'toast-container' },
             didOpen: toast => {
@@ -90,28 +82,27 @@ export default function RecuperarSenha() {
     return (
         <DefaultPage title='Recuperar senha'>
             <ContainerRoot>
-                <ContainerContent maxWidth='400px'>
-                    <Box className={classes.container}>
-                        <Box className={classes.flex} />
-                        <Form onSubmit={handleSubmit} className={classes.form}>
-                            <EmailField
-                                label='E-mail'
-                                name='email'
-                                onChange={handleChange}
-                                value={values.email}
-                                error={!!errors.email}
-                                helperText={errors.email}
-                            />
-                            <SendButton
-                                className={classes.sendButton}
-                                text='Enviar'
-                                width='50%'
-                                type='submit'
-                                disabled={disabledButton}
-                            />
-                        </Form>
-                        <Box className={classes.flex} />
-                    </Box>
+                <ContainerContent maxWidth='430px'>
+                    <Typography className={classes.texto}>
+                        Informe um e-mail válido para efetuar a troca de senha.
+                    </Typography>
+                    <Form onSubmit={handleSubmit} className={classes.form}>
+                        <EmailField
+                            label='E-mail'
+                            name='email'
+                            onChange={handleChange}
+                            value={values.email}
+                            error={!!errors.email}
+                            helperText={errors.email}
+                        />
+                        <SendButton
+                            className={classes.sendButton}
+                            text='Enviar'
+                            width='50%'
+                            type='submit'
+                            disabled={disabledButton}
+                        />
+                    </Form>
                 </ContainerContent>
             </ContainerRoot>
         </DefaultPage>

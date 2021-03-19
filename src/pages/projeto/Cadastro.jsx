@@ -83,7 +83,7 @@ export default function CadastroProjeto(props) {
     const enums = useSelector(state => state.enums);
     const enumPerfilMembroProjeto = enums.enumPerfilMembroProjeto;
     const idUsuario = useSelector(state => state.usuario.dadosUsuario.id);
-    const projeto = props.location.state;
+    const projeto = props.location.state ? props.location.state.projeto : null;
     const [values, setValues] = useState(defaultValues(idUsuario));
     const [errors, setErrors] = useState(defaultValues());
     const [disabledButton, setDisabledButton] = useState(false);
@@ -104,16 +104,20 @@ export default function CadastroProjeto(props) {
     useEffect(() => {
         if (!projeto) return;
 
-        setValues({
-            idUsuario,
-            id: projeto.id,
-            descricao: projeto.descricao,
-            idTemplateProjeto: projeto.idTemplateProjeto,
-            dataInicio: projeto.dataInicio,
-            dataPrevistaTermino: projeto.dataPrevistaTermino,
-            tipoProjeto: projeto.tipoProjeto,
-            membros: projeto.membros || []
-        });
+        Api.get(`/projeto/${projeto.id}`)
+            .then(resp => {
+                const data = resp.data;
+                setValues({
+                    idUsuario,
+                    id: data.id,
+                    descricao: data.descricao,
+                    idTemplateProjeto: data.idTemplateProjeto,
+                    dataInicio: data.dataInicio,
+                    dataPrevistaTermino: data.dataPrevistaTermino,
+                    tipoProjeto: data.tipoProjeto,
+                    membros: data.membros
+                });
+            })
     }, [projeto, idUsuario]);
 
 
@@ -147,8 +151,29 @@ export default function CadastroProjeto(props) {
     }
 
     function removeMembroApi(membro) {
-        alert();
+        Api.delete(`/projeto/${values.id}/membro/${membro.id}`)
+            .then(() => {
+                removeMembroProjeto(membro);
+                showToast('Membro removido com sucesso!');
+            }).catch(error => {
+                showMsgError(`${error.response ? error.response.data.message : error.message}`);
+            });
     }
+
+    // function questionamento(title, msg, callback) {
+    //     Swal.fire({
+    //         title: title,
+    //         text: msg,
+    //         icon: 'question',
+    //         showCancelButton: true,
+    //         confirmButtonColor: '#3085d6',
+    //         cancelButtonColor: '#d33',
+    //         confirmButtonText: 'Sim',
+    //         cancelButtonText: 'Não'
+    //     }).then((result) => {
+    //         if (result.isConfirmed) callback();
+    //     })
+    // }
 
     function removeMembroProjeto(membro) {
         let newArraymembros = [...values.membros];
@@ -238,14 +263,17 @@ export default function CadastroProjeto(props) {
                             error={!!errors.descricao}
                             helperText={errors.descricao}
                         />
-                        <SelectField
-                            name='idTemplateProjeto'
-                            data={tipoTemplate}
-                            label='Tipo projeto'
-                            value={values.idTemplateProjeto}
-                            onChange={handleChange}
-                            error={errors.idTemplateProjeto}
-                        />
+                        {
+                            tipoTemplate.length > 0 &&
+                            <SelectField
+                                name='idTemplateProjeto'
+                                data={tipoTemplate}
+                                label='Tipo projeto'
+                                value={values.idTemplateProjeto}
+                                onChange={handleChange}
+                                error={errors.idTemplateProjeto}
+                            />
+                        }
                         <Box display='flex' justifyContent='space-between'>
                             <DateField
                                 style={{ width: '45%' }}
