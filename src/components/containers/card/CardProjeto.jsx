@@ -3,6 +3,7 @@ import { makeStyles, withStyles } from '@material-ui/core/styles';
 import { useSelector, useDispatch } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import { atualizaDadosProjeto } from '../../../redux/user/Actions';
+import { Modal, Form, SelectField } from '../../Index';
 import Api from '../../../api/Index';
 import Box from '@material-ui/core/Box';
 import Typography from '@material-ui/core/Typography';
@@ -131,6 +132,9 @@ export default function CardProjeto(props) {
     const statusProjeto = enums.enumStatusProjeto.filter(item => item.valor === projeto.status)[0].descricao;
     const tipoProjeto = enums.enumTipoProjeto.filter(item => item.valor === projeto.tipoProjeto)[0].descricao;
     const [showCardList, setShowCardList] = useState(false);
+    const [openModal, setOpenModal] = useState(false);
+    const [motivoEncProjeto, setMotivoEncProjeto] = useState('');
+    const [errorMotivoEncProjeto, setErrorMotivoEncProjeto] = useState('');
     const classes = useStyles({ ...props, showCardList });
     const dadosProjetos = useSelector(state => state.usuario.dadosProjeto);
     const dispatch = useDispatch();
@@ -210,7 +214,24 @@ export default function CardProjeto(props) {
         dispatch(Object.assign(atualizaDadosProjeto(), { data: arrayFiltro }));
     }
 
-    return (
+    function handleChange(event) {
+        setMotivoEncProjeto(event.target.value);
+    }
+
+    function encerrarProjeto() {
+        if(!motivoEncProjeto) {
+            setErrorMotivoEncProjeto('Obrigatório informar o motivo.');
+            return;
+        }
+        setErrorMotivoEncProjeto('');
+    }
+
+    function closeModal() {
+        setOpenModal(false);
+        setMotivoEncProjeto('');
+    }
+
+    return <>
         <Box className={classes.card}>
             <Box className={classes.cardHeader}>
                 <BookmarkBorderIcon />
@@ -253,7 +274,7 @@ export default function CardProjeto(props) {
                         <ListItemIcon><DeleteForeverIcon /></ListItemIcon>
                         <ListItemText>Excluir projeto</ListItemText>
                     </ListItem>
-                    <ListItem>
+                    <ListItem onClick={() => setOpenModal(true)}>
                         <ListItemIcon><StopIcon /></ListItemIcon>
                         <ListItemText>Encerrar projeto</ListItemText>
                     </ListItem>
@@ -264,5 +285,21 @@ export default function CardProjeto(props) {
                 </List>
             </Box>
         </Box>
-    );
+        <Modal
+            open={openModal}
+            title='Encerrar projeto'
+            onClose={closeModal}
+            onSubmit={encerrarProjeto}
+        >
+            <Form onSubmit={encerrarProjeto}>
+                <SelectField
+                label='Motivo encerramento'
+                    value={motivoEncProjeto}
+                    onChange={handleChange}
+                    data={enums.enumMotivoEncerramentoProjeto}
+                    error={errorMotivoEncProjeto}
+                />
+            </Form>
+        </Modal>
+    </>;
 }

@@ -108,6 +108,8 @@ export default function Atividade(props) {
     function onDragEnd(result) {
         const { source, destination } = result;
 
+        if(!source || !destination) return;
+
         if (source.droppableId === destination.droppableId) {
             const newList = reorder(
                 getList(source.droppableId),
