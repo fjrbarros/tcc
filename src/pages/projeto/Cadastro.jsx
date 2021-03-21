@@ -107,6 +107,10 @@ export default function CadastroProjeto(props) {
         Api.get(`/projeto/${projeto.id}`)
             .then(resp => {
                 const data = resp.data;
+                const dataInicioSplit = data.dataInicio.split('/');
+                const dataPrevistaTerminoSplit = data.dataPrevistaTermino.split('/');
+                data.dataInicio = new Date(`${dataInicioSplit[1]}/${dataInicioSplit[0]}/${dataInicioSplit[2]}`);
+                data.dataPrevistaTermino = new Date(`${dataPrevistaTerminoSplit[1]}/${dataPrevistaTerminoSplit[0]}/${dataPrevistaTerminoSplit[2]}`);
                 setValues({
                     idUsuario,
                     id: data.id,
@@ -203,16 +207,27 @@ export default function CadastroProjeto(props) {
         values.tipoProjeto = tipoProjeto;
         values.dataInicio = moment(values.dataInicio).format('DD/MM/YYYY');
         values.dataPrevistaTermino = moment(values.dataPrevistaTermino).format('DD/MM/YYYY');
-        Api.post('/projeto', values)
-            .then(() => {
-                showToast('Dados salvos com sucesso!');
-                setValues(defaultValues(idUsuario));
-                setDisabledButton(false);
-            })
-            .catch(error => {
-                setDisabledButton(false);
-                showMsgError(`${error.response ? error.response.data.message : error.message}`);
-            });
+
+        if (values.id) {
+            Api.put(`/projeto/${values.id}`, values)
+                .then(() => success())
+                .catch(error => failure(error));
+        } else {
+            Api.post('/projeto', values)
+                .then(() => success())
+                .catch(error => failure(error));
+        }
+
+        function success() {
+            showToast('Dados salvos com sucesso!');
+            setValues(defaultValues(idUsuario));
+            setDisabledButton(false);
+        }
+
+        function failure(error) {
+            setDisabledButton(false);
+            showMsgError(`${error.response ? error.response.data.message : error.message}`);
+        }
     }
 
     function showToast(msg) {
