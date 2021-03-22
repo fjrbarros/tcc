@@ -2,15 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { makeStyles, Box, Typography } from '@material-ui/core';
+import { NewButton, Modal } from '../../components/Index';
 import Api from '../../api/Index';
 import Swal from 'sweetalert2';
 
 const useStyles = makeStyles(theme => ({
     container: {
         display: 'flex',
-        margin: '0 auto',
-        width: '750px',
-        padding: '10px 0px'
+        // margin: '0 auto',
+        minWidth: '750px',
+        padding: '10px 0'
     },
 
     teste: {
@@ -24,6 +25,17 @@ const useStyles = makeStyles(theme => ({
         width: '100%',
         maxWidth: '400px',
         backgroundColor: '#fff'
+    },
+
+    containerButtons: {
+        display: 'flex',
+        alignItems: 'flex-end',
+        flexDirection: 'column',
+        width: '33%',
+        padding: '10px',
+        '& button': {
+            marginBottom: '10px'
+        }
     }
 }));
 
@@ -83,6 +95,7 @@ export default function Atividade(props) {
     const idList = { to_do: 'to_do', doing: 'doing', done: 'done' };
     const classes = useStyles();
     const idUsuario = useSelector(state => state.usuario.dadosUsuario.id);
+    const [openModal, setOpenModal] = useState(false);
 
     useEffect(() => {
         Api.get(`/projeto/${projeto.id}/atividades`
@@ -214,68 +227,91 @@ export default function Atividade(props) {
         );
     }
 
-    return (
-        <DragDropContext onDragEnd={onDragEnd}>
-            <Box className={classes.container}>
-                <Droppable droppableId='to_do'>
-                    {(provided, snapshot) => (
-                        <Box style={getListStyle(snapshot.isDraggingOver, 'TO DO')}>
-                            { getHeaderColumn('TO DO')}
-                            <Box padding='5px 5px 0px' height='100%' ref={provided.innerRef}>
-                                {atividade.to_do.map((item, index) => (
-                                    <Draggable
-                                        key={item.id.toString()}
-                                        draggableId={item.id.toString()}
-                                        index={index}
-                                        item={item}
-                                    >
-                                        {defaultProps(item)}
-                                    </Draggable>
-                                ))}
-                                {provided.placeholder}
-                            </Box>
-                        </Box>
-                    )}
-                </Droppable>
-                <Droppable droppableId='doing'>
-                    {(provided, snapshot) => (
-                        <Box style={getListStyle(snapshot.isDraggingOver, 'DOING')}>
-                            { getHeaderColumn('DOING')}
-                            <Box padding='5px 5px 0px' height='100%' ref={provided.innerRef}>
-                                {atividade.doing.map((item, index) => (
-                                    <Draggable
-                                        key={item.id.toString()}
-                                        draggableId={item.id.toString()}
-                                        index={index}
-                                    >
-                                        {defaultProps(item)}
-                                    </Draggable>
-                                ))}
-                                {provided.placeholder}
-                            </Box>
-                        </Box>
-                    )}
-                </Droppable>
-                <Droppable droppableId='done'>
-                    {(provided, snapshot) => (
-                        <Box style={getListStyle(snapshot.isDraggingOver, 'DONE')}>
-                            { getHeaderColumn('DONE')}
-                            <Box padding='5px 5px 0px' height='100%' ref={provided.innerRef}>
-                                {atividade.done.map((item, index) => (
-                                    <Draggable
-                                        key={item.id.toString()}
-                                        draggableId={item.id.toString()}
-                                        index={index}
-                                    >
-                                        {defaultProps(item)}
-                                    </Draggable>
-                                ))}
-                                {provided.placeholder}
-                            </Box>
-                        </Box>
-                    )}
-                </Droppable>
+    function closeModal() {
+        setOpenModal(false);
+    }
+
+    return <>
+        <Box display='flex'>
+            <Box className={classes.containerButtons}>
+                <NewButton
+                    text='Nova atividade'
+                    width='170px'
+                    onClick={() => setOpenModal(true)}
+                />
             </Box>
-        </DragDropContext>
-    );
+            <Box width={'66%'}>
+                <DragDropContext onDragEnd={onDragEnd}>
+                    <Box className={classes.container}>
+                        <Droppable droppableId='to_do'>
+                            {(provided, snapshot) => (
+                                <Box style={getListStyle(snapshot.isDraggingOver, 'TO DO')}>
+                                    { getHeaderColumn('TO DO')}
+                                    <Box padding='5px 5px 0px' height='100%' ref={provided.innerRef}>
+                                        {atividade.to_do.map((item, index) => (
+                                            <Draggable
+                                                key={item.id.toString()}
+                                                draggableId={item.id.toString()}
+                                                index={index}
+                                                item={item}
+                                            >
+                                                {defaultProps(item)}
+                                            </Draggable>
+                                        ))}
+                                        {provided.placeholder}
+                                    </Box>
+                                </Box>
+                            )}
+                        </Droppable>
+                        <Droppable droppableId='doing'>
+                            {(provided, snapshot) => (
+                                <Box style={getListStyle(snapshot.isDraggingOver, 'DOING')}>
+                                    { getHeaderColumn('DOING')}
+                                    <Box padding='5px 5px 0px' height='100%' ref={provided.innerRef}>
+                                        {atividade.doing.map((item, index) => (
+                                            <Draggable
+                                                key={item.id.toString()}
+                                                draggableId={item.id.toString()}
+                                                index={index}
+                                            >
+                                                {defaultProps(item)}
+                                            </Draggable>
+                                        ))}
+                                        {provided.placeholder}
+                                    </Box>
+                                </Box>
+                            )}
+                        </Droppable>
+                        <Droppable droppableId='done'>
+                            {(provided, snapshot) => (
+                                <Box style={getListStyle(snapshot.isDraggingOver, 'DONE')}>
+                                    { getHeaderColumn('DONE')}
+                                    <Box padding='5px 5px 0px' height='100%' ref={provided.innerRef}>
+                                        {atividade.done.map((item, index) => (
+                                            <Draggable
+                                                key={item.id.toString()}
+                                                draggableId={item.id.toString()}
+                                                index={index}
+                                            >
+                                                {defaultProps(item)}
+                                            </Draggable>
+                                        ))}
+                                        {provided.placeholder}
+                                    </Box>
+                                </Box>
+                            )}
+                        </Droppable>
+                    </Box>
+                </DragDropContext>
+            </Box>
+        </Box>
+        <Modal
+            open={openModal}
+            title='Nova atividade'
+            onClose={closeModal}
+        // onSubmit
+        >
+            <h1>teste</h1>
+        </Modal>
+    </>;
 }

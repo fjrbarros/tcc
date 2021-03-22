@@ -16,6 +16,7 @@ export { default as SaveButton } from './buttons/SaveButton';
 export { default as SendButton } from './buttons/SendButton';
 export { default as HomeButton } from './buttons/HomeButton';
 export { default as EditButton } from './buttons/EditButton';
+export { default as NewButton } from './buttons/NewButton';
 export { default as Chat } from './containers/chat/Chat';
 export { default as NavigateProjetos } from './containers/NavigateProjetos';
 export { default as Tabpanel } from './tabpanel/Tabpanel';
