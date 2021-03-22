@@ -128,6 +128,7 @@ const BorderLinearProgress = withStyles((theme) => ({
 
 export default function CardProjeto(props) {
     const { projeto } = props;
+    const idUsuario = useSelector(state => state.usuario.dadosUsuario.id);
     const enums = useSelector(state => state.enums);
     const statusProjeto = enums.enumStatusProjeto.filter(item => item.valor === projeto.status)[0].descricao;
     const tipoProjeto = enums.enumTipoProjeto.filter(item => item.valor === projeto.tipoProjeto)[0].descricao;
@@ -203,9 +204,7 @@ export default function CardProjeto(props) {
                 .then(resp => {
                     atualizaProjetos();
                     showToast('Projeto removido com sucesso!');
-                }).catch(error => {
-                    showMsgError(`${error.response ? error.response.data.message : error.message}`);
-                });
+                }).catch(error => showMsgError(`${error.response ? error.response.data.message : error.message}`));
         });
     }
 
@@ -219,11 +218,21 @@ export default function CardProjeto(props) {
     }
 
     function encerrarProjeto() {
-        if(!motivoEncProjeto) {
+        if (!motivoEncProjeto) {
             setErrorMotivoEncProjeto('Obrigatório informar o motivo.');
             return;
         }
         setErrorMotivoEncProjeto('');
+
+        Api.post(`/projeto/${projeto.id}/encerramento`, {
+            motivo: motivoEncProjeto,
+            idUsuario
+        })
+            .then(() => {
+                showToast('Projeto encerrado com sucesso!');
+                closeModal();
+            })
+            .catch(error => showMsgError(`${error.response ? error.response.data.message : error.message}`));
     }
 
     function closeModal() {
@@ -293,7 +302,7 @@ export default function CardProjeto(props) {
         >
             <Form onSubmit={encerrarProjeto}>
                 <SelectField
-                label='Motivo encerramento'
+                    label='Motivo encerramento'
                     value={motivoEncProjeto}
                     onChange={handleChange}
                     data={enums.enumMotivoEncerramentoProjeto}

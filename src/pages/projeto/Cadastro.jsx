@@ -164,21 +164,6 @@ export default function CadastroProjeto(props) {
             });
     }
 
-    // function questionamento(title, msg, callback) {
-    //     Swal.fire({
-    //         title: title,
-    //         text: msg,
-    //         icon: 'question',
-    //         showCancelButton: true,
-    //         confirmButtonColor: '#3085d6',
-    //         cancelButtonColor: '#d33',
-    //         confirmButtonText: 'Sim',
-    //         cancelButtonText: 'Não'
-    //     }).then((result) => {
-    //         if (result.isConfirmed) callback();
-    //     })
-    // }
-
     function removeMembroProjeto(membro) {
         let newArraymembros = [...values.membros];
 

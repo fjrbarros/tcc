@@ -108,7 +108,7 @@ export default function Atividade(props) {
     function onDragEnd(result) {
         const { source, destination } = result;
 
-        if(!source || !destination) return;
+        if (!source || !destination) return;
 
         if (source.droppableId === destination.droppableId) {
             const newList = reorder(
@@ -186,6 +186,7 @@ export default function Atividade(props) {
                     snapshot.isDragging,
                     provided.draggableProps.style
                 )}
+                onClick={() => alert()}
             >
                 {item.descricao}
             </Box>
