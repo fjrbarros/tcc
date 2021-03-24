@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { makeStyles, Box, Typography } from '@material-ui/core';
-import { NewButton, Modal } from '../../components/Index';
+import { NewButton, Modal, TextField, DateField, Form } from '../../components/Index';
 import Api from '../../api/Index';
 import Swal from 'sweetalert2';
+import moment from 'moment';
 
 const useStyles = makeStyles(theme => ({
     container: {
@@ -89,22 +90,38 @@ function getListStyle(isDraggingOver, text) {
     }
 }
 
+function getValuesAtividade(idUsuario) {
+    return {
+        idUsuario,
+        descricao: '',
+        detalhes: '',
+        dataInicio: new Date(),
+        dataTermino: new Date(),
+    }
+}
+
 export default function Atividade(props) {
-    const { projeto } = props.location.state;
-    const [atividade, setAtividade] = useState({ to_do: [], doing: [], done: [] });
-    const idList = { to_do: 'to_do', doing: 'doing', done: 'done' };
     const classes = useStyles();
     const idUsuario = useSelector(state => state.usuario.dadosUsuario.id);
+    const { projeto } = props.location.state;
+    const [atividade, setAtividade] = useState({ to_do: [], doing: [], done: [] });
     const [openModal, setOpenModal] = useState(false);
+    const [valuesAtividade, setValuesAtividade] = useState(getValuesAtividade(idUsuario))
+    const [errorsAtividade, setErrorsAtividade] = useState(getValuesAtividade(idUsuario))
+    const idList = { to_do: 'to_do', doing: 'doing', done: 'done' };
 
     useEffect(() => {
-        Api.get(`/projeto/${projeto.id}/atividades`
-        ).then(resp => {
-            organizaDados(resp.data);
-        }).catch(error => {
-            showMessageError(`${error.response ? error.response.data.message : error.message}`);
-        });
-    }, [projeto.id]);
+        getAtividades();
+    }, []);
+
+    function getAtividades() {
+        Api.get(`/projeto/${projeto.id}/atividades`)
+            .then(resp => {
+                organizaDados(resp.data);
+            }).catch(error => {
+                showMessageError(`${error.response ? error.response.data.message : error.message}`);
+            });
+    }
 
     function organizaDados(dados) {
         const to_do = dados.filter(item => item.estagio === 'TO_DO');
@@ -189,6 +206,24 @@ export default function Atividade(props) {
         });
     }
 
+    function showToast(msg) {
+        Swal.fire({
+            toast: true,
+            icon: 'success',
+            title: msg,
+            showClass: false,
+            position: 'top',
+            showConfirmButton: false,
+            timer: 2000,
+            timerProgressBar: true,
+            customClass: { container: 'toast-container' },
+            didOpen: toast => {
+                toast.addEventListener('mouseenter', Swal.stopTimer)
+                toast.addEventListener('mouseleave', Swal.resumeTimer)
+            }
+        });
+    }
+
     function defaultProps(item) {
         return (provided, snapshot) => (
             <Box
@@ -199,7 +234,6 @@ export default function Atividade(props) {
                     snapshot.isDragging,
                     provided.draggableProps.style
                 )}
-                onClick={() => alert()}
             >
                 {item.descricao}
             </Box>
@@ -229,6 +263,47 @@ export default function Atividade(props) {
 
     function closeModal() {
         setOpenModal(false);
+        setValuesAtividade(getValuesAtividade(idUsuario));
+        setErrorsAtividade(getValuesAtividade(idUsuario));
+    }
+
+    function handleChangeAtividade(event) {
+        setValuesAtividade({ ...valuesAtividade, [event.target.name]: event.target.value });
+    }
+
+    function handleSubmitAtividade() {
+        const errors = {};
+        const data = { descricao: valuesAtividade.descricao, detalhes: valuesAtividade.detalhes };
+        validaForm(data, (campo, msg) => errors[campo] = msg);
+        setErrorsAtividade(errors);
+        if (Object.keys(errors).length === 0) {
+            salvarAtividade();
+        }
+    }
+
+    function validaForm(values, errorFn) {
+        if (!values.descricao.trim()) {
+            errorFn('descricao', 'Descrição é obrigatório!')
+        }
+
+        if (!values.detalhes.trim()) {
+            errorFn('detalhes', 'Detalhes é obrigatório!')
+        }
+    }
+
+    function salvarAtividade() {
+        
+        valuesAtividade.dataPrevistaInicio = moment(valuesAtividade.dataInicio).format('DD/MM/YYYY');
+        valuesAtividade.dataPrevistaTermino = moment(valuesAtividade.dataTermino).format('DD/MM/YYYY');
+
+        Api.post(`/projeto/${projeto.id}/atividade`, valuesAtividade)
+            .then(() => {
+                showToast('Dados salvos com sucesso!');
+                getAtividades();
+                closeModal();
+            })
+            .catch(error => showMessageError(`${error.response ? error.response.data.message : error.message}`));
+
     }
 
     return <>
@@ -309,9 +384,42 @@ export default function Atividade(props) {
             open={openModal}
             title='Nova atividade'
             onClose={closeModal}
-        // onSubmit
+            onSubmit={handleSubmitAtividade}
         >
-            <h1>teste</h1>
+            <Form onSubmit={handleSubmitAtividade}>
+                <TextField
+                    name='descricao'
+                    label='Descrição'
+                    value={valuesAtividade.descricao}
+                    onChange={handleChangeAtividade}
+                    error={!!errorsAtividade.descricao}
+                    helperText={errorsAtividade.descricao}
+                />
+                <TextField
+                    name='detalhes'
+                    label='Detalhes'
+                    value={valuesAtividade.detalhes}
+                    onChange={handleChangeAtividade}
+                    error={!!errorsAtividade.detalhes}
+                    helperText={errorsAtividade.detalhes}
+                />
+                <Box display='flex' justifyContent='space-between'>
+                    <DateField
+                        style={{ width: '45%' }}
+                        label='Data prevista início'
+                        name='dataInicio'
+                        value={valuesAtividade.dataInicio}
+                        onChange={date => setValuesAtividade({ ...valuesAtividade, dataInicio: date })}
+                    />
+                    <DateField
+                        style={{ width: '45%' }}
+                        label='Data prevista término'
+                        name='dataTermino'
+                        value={valuesAtividade.dataTermino}
+                        onChange={date => setValuesAtividade({ ...valuesAtividade, dataTermino: date })}
+                    />
+                </Box>
+            </Form>
         </Modal>
     </>;
 }
