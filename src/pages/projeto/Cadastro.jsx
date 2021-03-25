@@ -27,6 +27,11 @@ const useStyles = makeStyles(theme => ({
         padding: '10px'
     },
 
+    input: {
+        marginTop: '15px',
+        marginBottom: 0
+    },
+
     inputIntegrantes: {
         width: '44%',
         margin: 0,
@@ -59,7 +64,7 @@ const useStyles = makeStyles(theme => ({
     },
 
     saveButton: {
-        margin: '10px 0',
+        margin: '15px 0',
         marginLeft: '50%',
         transform: 'translate(-50%)'
     }
@@ -71,8 +76,8 @@ function defaultValues(idUsuario) {
         id: null,
         descricao: '',
         idTemplateProjeto: '',
-        dataInicio: new Date(),
-        dataPrevistaTermino: new Date(),
+        dataIni: new Date(),
+        dataFim: new Date(),
         tipoProjeto: '',
         membros: []
     }
@@ -82,24 +87,26 @@ export default function CadastroProjeto(props) {
     const classes = useStyles();
     const enums = useSelector(state => state.enums);
     const enumPerfilMembroProjeto = enums.enumPerfilMembroProjeto;
+    const enumTipoProjeto = enums.enumTipoProjeto;
     const idUsuario = useSelector(state => state.usuario.dadosUsuario.id);
+    const emailUsuario = useSelector(state => state.usuario.dadosUsuario.email);
     const projeto = props.location.state ? props.location.state.projeto : null;
     const [values, setValues] = useState(defaultValues(idUsuario));
     const [errors, setErrors] = useState(defaultValues());
     const [disabledButton, setDisabledButton] = useState(false);
-    const [tipoTemplate, setTipoTemplate] = useState([]);
+    const [templateProjeto, setTemplateProjeto] = useState([]);
 
     useEffect(() => {
-        Api.get(`/templateProjeto/usuario/${idUsuario}`)
+        if (!idUsuario || !values.tipoProjeto) return;
+
+        Api.get(`/templateProjeto/${idUsuario}/${values.tipoProjeto}`)
             .then(resp => {
                 const data = [];
-                resp.data.forEach(item => {
-                    data.push({ valor: item.id, descricao: item.descricao, tipoProjeto: item.tipoProjeto });
-                })
-                setTipoTemplate(data);
+                resp.data.forEach(item => data.push({ valor: item.id, descricao: item.descricao }));
+                setTemplateProjeto(data);
             })
             .catch(error => showMsgError(`${error.response ? error.response.data.message : error.message}`));
-    }, [idUsuario]);
+    }, [values.tipoProjeto, idUsuario]);
 
     useEffect(() => {
         if (!projeto) return;
@@ -116,8 +123,8 @@ export default function CadastroProjeto(props) {
                     id: data.id,
                     descricao: data.descricao,
                     idTemplateProjeto: data.idTemplateProjeto,
-                    dataInicio: data.dataInicio,
-                    dataPrevistaTermino: data.dataPrevistaTermino,
+                    dataIni: data.dataInicio,
+                    dataFim: data.dataPrevistaTermino,
                     tipoProjeto: data.tipoProjeto,
                     membros: data.membros
                 });
@@ -146,6 +153,11 @@ export default function CadastroProjeto(props) {
     }
 
     function removeMembro(membro, index) {
+        if (membro.emailMembro === emailUsuario) {
+            showMsgError('Não pode se desvincular do projeto!');
+            return;
+        }
+
         if (membro.id) {
             removeMembroApi(membro);
             return;
@@ -175,10 +187,8 @@ export default function CadastroProjeto(props) {
     function handleSubmit() {
         setDisabledButton(true);
         const errors = {};
-        validaForm({
-            descricao: values.descricao,
-            idTemplateProjeto: values.idTemplateProjeto,
-        }, (campo, msg) => errors[campo] = msg);
+        const data = { descricao: values.descricao, tipoProjeto: values.tipoProjeto };
+        validaForm(data, (campo, msg) => errors[campo] = msg);
         setErrors(errors);
         if (Object.keys(errors).length === 0) {
             cadastraProjeto();
@@ -188,10 +198,11 @@ export default function CadastroProjeto(props) {
     }
 
     function cadastraProjeto() {
-        const tipoProjeto = tipoTemplate.filter(item => item.valor === values.idTemplateProjeto)[0].tipoProjeto;
-        values.tipoProjeto = tipoProjeto;
-        values.dataInicio = moment(values.dataInicio).format('DD/MM/YYYY');
-        values.dataPrevistaTermino = moment(values.dataPrevistaTermino).format('DD/MM/YYYY');
+        values.dataInicio = moment(values.dataIni).format('DD/MM/YYYY');
+        values.dataPrevistaTermino = moment(values.dataFim).format('DD/MM/YYYY');
+
+        delete values.dataIni;
+        delete values.dataFim;
 
         if (values.id) {
             Api.put(`/projeto/${values.id}`, values)
@@ -258,36 +269,43 @@ export default function CadastroProjeto(props) {
                         <TextField
                             label='Descrição'
                             name='descricao'
+                            className={classes.input}
                             value={values.descricao}
                             onChange={handleChange}
                             error={!!errors.descricao}
                             helperText={errors.descricao}
                         />
-                        {
-                            tipoTemplate.length > 0 &&
-                            <SelectField
-                                name='idTemplateProjeto'
-                                data={tipoTemplate}
-                                label='Tipo projeto'
-                                value={values.idTemplateProjeto}
-                                onChange={handleChange}
-                                error={errors.idTemplateProjeto}
-                            />
-                        }
+                        <SelectField
+                            label='Tipo projeto'
+                            name='tipoProjeto'
+                            className={classes.input}
+                            data={enumTipoProjeto}
+                            value={values.tipoProjeto}
+                            onChange={handleChange}
+                            error={errors.tipoProjeto}
+                        />
+                        <SelectField
+                            label='Modelo base'
+                            name='idTemplateProjeto'
+                            className={classes.input}
+                            data={templateProjeto}
+                            value={values.idTemplateProjeto}
+                            onChange={handleChange}
+                        />
                         <Box display='flex' justifyContent='space-between'>
                             <DateField
                                 style={{ width: '45%' }}
                                 label='Data início'
-                                name='dataInicio'
-                                value={values.dataInicio}
-                                onChange={date => setValues({ ...values, dataInicio: date })}
+                                name='dataIni'
+                                value={values.dataIni}
+                                onChange={date => setValues({ ...values, dataIni: date })}
                             />
                             <DateField
                                 style={{ width: '45%' }}
                                 label='Data prevista término'
-                                name='dataPrevistaTermino'
-                                value={values.dataPrevistaTermino}
-                                onChange={date => setValues({ ...values, dataPrevistaTermino: date })}
+                                name='dataFim'
+                                value={values.dataFim}
+                                onChange={date => setValues({ ...values, dataFim: date })}
                             />
                         </Box>
                         <Box display='flex' justifyContent='flex-end' alignItems='center'>

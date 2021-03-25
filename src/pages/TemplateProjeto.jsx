@@ -53,17 +53,21 @@ const useStyles = makeStyles(theme => ({
     }
 }));
 
+function getValues(idUsuario) {
+    return {
+        idUsuario,
+        tipoProjeto: '',
+        descricao: ''
+    };
+}
+
 export default function TemplateProjeto() {
     const classes = useStyles();
     const idUsuario = useSelector(state => state.usuario.dadosUsuario.id);
     const enums = useSelector(state => state.enums);
     const enumTipoProjeto = enums.enumTipoProjeto;
     const [atividades, setAtividades] = useState([]);
-    const [values, setValues] = useState({
-        idUsuario,
-        tipoProjeto: '',
-        descricao: ''
-    });
+    const [values, setValues] = useState(getValues(idUsuario));
 
     useEffect(() => {
         if (!values.tipoProjeto) return;
@@ -127,6 +131,8 @@ export default function TemplateProjeto() {
         })
             .then(() => {
                 showToast('Template salvo com sucesso!');
+                setValues(getValues(idUsuario));
+                setAtividades([]);
             })
             .catch(error => {
                 showMsgError(`${error.response ? error.response.data.message : error.message}`);
@@ -242,7 +248,12 @@ export default function TemplateProjeto() {
                     {
                         atividades.length > 0 &&
                         <SaveButton
-                            style={{ marginLeft: '50%', transform: 'translate(-50%)' }}
+                            style={{
+                                marginTop: '15px',
+                                marginBottom: '15px',
+                                marginLeft: '50%',
+                                transform: 'translate(-50%)'
+                            }}
                             text='Salvar'
                             width='50%'
                             onClick={salvarTemplate}

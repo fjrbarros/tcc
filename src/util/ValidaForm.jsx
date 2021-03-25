@@ -31,9 +31,9 @@ export function validaForm(values, errorFn) {
         }
     }
 
-    if (values.hasOwnProperty('idTemplateProjeto')) {
-        if ((msg = validaTextoSimples(values.idTemplateProjeto, 'Tipo projeto'))) {
-            errorFn('idTemplateProjeto', msg)
+    if (values.hasOwnProperty('tipoProjeto')) {
+        if ((msg = validaTextoSimples(values.tipoProjeto, 'Tipo projeto'))) {
+            errorFn('tipoProjeto', msg)
         }
     }
 }
