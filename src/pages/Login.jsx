@@ -31,7 +31,7 @@ const useStyles = makeStyles(theme => ({
         maxWidth: '435px',
         minHeight: '435px',
         borderRadius: '5px',
-        padding: '15px',
+        padding: '30px 20px',
         textAlign: 'center',
         display: 'flex',
         flexDirection: 'column',
