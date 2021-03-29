@@ -7,9 +7,11 @@ const useStyles = makeStyles(theme => ({
     containerHeader: {
         display: 'flex',
         alignItems: 'center',
-        padding: theme.spacing(1),
-        ...theme.mixins.toolbar,
+        padding: '5px',
         justifyContent: 'flex-end',
+        '& button': {
+            padding: '8px'
+        }
     },
 }));
 

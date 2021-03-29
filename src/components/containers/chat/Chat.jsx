@@ -9,7 +9,12 @@ import ChatList from './ChatList';
 
 const useStyles = makeStyles(theme => ({
     drawer: {
-        marginTop: theme.appHeader.toolbar.height
+        marginTop: theme.appHeader.toolbar.height + 5
+    },
+
+    teste: {
+        height: `calc(100vh - 118px)`,
+        overflowY: 'auto',
     }
 }));
 
@@ -26,7 +31,9 @@ export default function Chat() {
         >
             <Box>
                 <ChatHeader fecharChat={() => dispatch(fecharChat())} />
-                <ChatList />
+                <Box className={classes.teste}>
+                    <ChatList />
+                </Box>
             </Box>
         </Drawer>
     );

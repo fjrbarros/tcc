@@ -43,7 +43,7 @@ const theme = {
         }
     },
     drawer: {
-        width: 300,
+        width: 305,
         borderColor: '#e0e0e0'
     },
     appHeader: {
