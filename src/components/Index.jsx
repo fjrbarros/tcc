@@ -5,6 +5,7 @@ export { default as ContainerContent } from './containers/ContainerContent';
 export { default as ContainerGrid } from './containers/ContainerGrid';
 export { default as ContainerCollapse } from './containers/ContainerCollapse';
 export { default as CardProjeto } from './containers/card/CardProjeto';
+export { default as CardAtividade } from './containers/card/CardAtividade';
 export { default as Form } from './form/Form';
 export { default as EmailField } from './form/EmailField';
 export { default as PasswordField } from './form/PasswordField';

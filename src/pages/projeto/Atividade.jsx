@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
-import { withStyles, makeStyles, Box, Typography, IconButton, Tooltip } from '@material-ui/core';
-import { Modal, TextField, DateField, Form } from '../../components/Index';
+import { makeStyles, Box, Typography, IconButton, Tooltip } from '@material-ui/core';
+import { Modal, TextField, DateField, Form, CardAtividade } from '../../components/Index';
 import AddIcon from '@material-ui/icons/Add';
-import DeleteForeverIcon from '@material-ui/icons/DeleteForever';
-import LinearProgress from '@material-ui/core/LinearProgress';
 import Api from '../../api/Index';
 import Swal from 'sweetalert2';
 import moment from 'moment';
@@ -36,23 +34,6 @@ const useStyles = makeStyles(theme => ({
     }
 }));
 
-const BorderLinearProgress = withStyles((theme) => ({
-    root: {
-        height: 7,
-        borderRadius: 5,
-        flex: 0.83
-    },
-
-    colorPrimary: {
-        backgroundColor: theme.palette.grey[theme.palette.type === 'light' ? 200 : 700],
-    },
-
-    bar: {
-        backgroundColor: '#1a90ff',
-
-    }
-}))(LinearProgress);
-
 const reorder = (list, startIndex, endIndex) => {
     const result = Array.from(list);
     const [removed] = result.splice(startIndex, 1);
@@ -75,25 +56,8 @@ const move = (source, destination, droppableSource, droppableDestination) => {
     return result;
 };
 
-const grid = 8;
-
-const getItemStyle = (isDragging, draggableStyle) => ({
-    userSelect: 'none',
-    outline: 'none',
-    padding: '25px 10px',
-    margin: `0 0 ${grid}px 0`,
-    border: `1px solid ${isDragging ? 'orange' : 'transparent'}`,
-    borderRadius: '5px',
-    position: 'relative',
-    boxShadow: `${isDragging ? 'none' : '0px 0px 5px 0px rgba(0, 0, 0, 0.4)'}`,
-    ...draggableStyle
-});
-
 function getListStyle(isDraggingOver, text) {
-    let color = '';
-    if (text === 'TO DO') color = '#efc100';
-    if (text === 'DOING') color = '#0ac';
-    if (text === 'DONE') color = '#0b0';
+    const color = getListColor(text);
 
     return {
         border: isDraggingOver ? `1.5px dashed ${color}` : `1.5px solid ${color}`,
@@ -102,6 +66,19 @@ function getListStyle(isDraggingOver, text) {
         borderTopRightRadius: '10px',
         width: 250,
         margin: '0 10px'
+    }
+}
+
+function getListColor(text) {
+    switch (text) {
+        case 'TO DO':
+            return '#efc100';
+        case 'DOING':
+            return '#0ac';
+        case 'DONE':
+            return '#0b0';
+        default:
+            return 'transparent';
     }
 }
 
@@ -235,47 +212,6 @@ export default function Atividade(props) {
         });
     }
 
-    function defaultProps(item) {
-        return (provided, snapshot) => (
-            <Box
-                ref={provided.innerRef}
-                {...provided.draggableProps}
-                {...provided.dragHandleProps}
-                style={getItemStyle(
-                    snapshot.isDragging,
-                    provided.draggableProps.style
-                )}
-            >
-                <Tooltip title='Remover atividade' placement='left'>
-                    <DeleteForeverIcon
-                        onClick={() => removerAtividade(item)}
-                        style={{
-                            fontSize: '1.3rem',
-                            fill: '#333333db',
-                            cursor: 'pointer',
-                            position: 'absolute',
-                            top: '1px',
-                            right: '1px'
-                        }}
-                    />
-                </Tooltip>
-                <Typography
-                    style={{
-                        whiteSpace: 'nowrap',
-                        textOverflow: 'Ellipsis',
-                        overflow: 'hidden'
-                    }}
-                >
-                    {item.descricao}
-                </Typography>
-                <Box display='flex' position='absolute' alignItems='center' bottom='0' width='100%'>
-                    <BorderLinearProgress variant='determinate' value={item.percentualConclusao} />
-                    <span style={{ marginLeft: '5px', flex: 0.17 }}>{item.percentualConclusao}%</span>
-                </Box>
-            </Box>
-        )
-    }
-
     function removerAtividade(atividade) {
         questionamento('Excluir atividade!', `Você realmente deseja excluir a atividade ${atividade.descricao}?`, () => {
             Api.delete(`/projeto/${projeto.id}/atividade/${atividade.id}`)
@@ -322,10 +258,7 @@ export default function Atividade(props) {
     }
 
     function getHeaderColumn(text) {
-        let background = '';
-        if (text === 'TO DO') background = '#efc100';
-        if (text === 'DOING') background = '#0ac';
-        if (text === 'DONE') background = '#0b0';
+        const background = getListColor(text);
 
         return (
             <Box style={{
@@ -428,11 +361,19 @@ export default function Atividade(props) {
                                         index={index}
                                         item={item}
                                     >
-                                        {defaultProps(item)}
+                                        {
+                                            (provided, snapshot) => <CardAtividade
+                                                provided={provided}
+                                                snapshot={snapshot}
+                                                descricao={item.descricao}
+                                                percentualConclusao={item.percentualConclusao}
+                                                removerAtividade={() => removerAtividade(item)}
+                                            />
+                                        }
                                     </Draggable>
                                 ))}
-                                {provided.placeholder}
                             </Box>
+                            {provided.placeholder}
                         </Box>
                     )}
                 </Droppable>
@@ -447,11 +388,19 @@ export default function Atividade(props) {
                                         draggableId={item.id.toString()}
                                         index={index}
                                     >
-                                        {defaultProps(item)}
+                                        {
+                                            (provided, snapshot) => <CardAtividade
+                                                provided={provided}
+                                                snapshot={snapshot}
+                                                descricao={item.descricao}
+                                                percentualConclusao={item.percentualConclusao}
+                                                removerAtividade={() => removerAtividade(item)}
+                                            />
+                                        }
                                     </Draggable>
                                 ))}
-                                {provided.placeholder}
                             </Box>
+                            {provided.placeholder}
                         </Box>
                     )}
                 </Droppable>
@@ -466,11 +415,19 @@ export default function Atividade(props) {
                                         draggableId={item.id.toString()}
                                         index={index}
                                     >
-                                        {defaultProps(item)}
+                                        {
+                                            (provided, snapshot) => <CardAtividade
+                                                provided={provided}
+                                                snapshot={snapshot}
+                                                descricao={item.descricao}
+                                                percentualConclusao={item.percentualConclusao}
+                                                removerAtividade={() => removerAtividade(item)}
+                                            />
+                                        }
                                     </Draggable>
                                 ))}
-                                {provided.placeholder}
                             </Box>
+                            {provided.placeholder}
                         </Box>
                     )}
                 </Droppable>
