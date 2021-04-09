@@ -91,7 +91,14 @@ const useStyles = makeStyles(theme => ({
 export default function CardAtividade(props) {
     const [showMaisOpcoes, setShowMaisOpcoes] = useState(false);
     const classes = useStyles({ ...props, showMaisOpcoes });
-    const { removerAtividade, descricao, percentualConclusao, provided, snapshot } = props;
+    const {
+        removerAtividade,
+        descricao,
+        percentualConclusao,
+        provided,
+        snapshot,
+        editar
+    } = props;
 
     function showCardMaisOpcoes() {
         setShowMaisOpcoes(!showMaisOpcoes);
@@ -121,7 +128,7 @@ export default function CardAtividade(props) {
                     </IconButton>
                 </Tooltip>
                 <Tooltip title='Editar atividade' placement='bottom'>
-                    <IconButton>
+                    <IconButton onClick={editar}>
                         <EditIcon />
                     </IconButton>
                 </Tooltip>

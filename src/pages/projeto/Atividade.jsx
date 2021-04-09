@@ -84,11 +84,13 @@ function getListColor(text) {
 
 function getValuesAtividade(idUsuario) {
     return {
+        id: null,
         idUsuario,
         descricao: '',
         detalhes: '',
         dataInicio: new Date(),
         dataTermino: new Date(),
+        tarefas: []
     }
 }
 
@@ -346,6 +348,17 @@ export default function Atividade(props) {
         setAtividade({ ...atividade, to_do: copyArray });
     }
 
+    function editarAtividade(atividade) {
+        setValuesAtividade({
+            ...valuesAtividade,
+            id: atividade.id,
+            descricao: atividade.descricao,
+            detalhes: atividade.detalhes,
+            tarefas: atividade.tarefas
+        });
+        setOpenModal(true);
+    }
+
     return <>
         <DragDropContext onDragEnd={onDragEnd}>
             <Box className={classes.container}>
@@ -366,6 +379,7 @@ export default function Atividade(props) {
                                                 provided={provided}
                                                 snapshot={snapshot}
                                                 descricao={item.descricao}
+                                                editar={() => editarAtividade(item)}
                                                 percentualConclusao={item.percentualConclusao}
                                                 removerAtividade={() => removerAtividade(item)}
                                             />
@@ -393,6 +407,7 @@ export default function Atividade(props) {
                                                 provided={provided}
                                                 snapshot={snapshot}
                                                 descricao={item.descricao}
+                                                editar={() => editarAtividade(item)}
                                                 percentualConclusao={item.percentualConclusao}
                                                 removerAtividade={() => removerAtividade(item)}
                                             />
@@ -420,6 +435,7 @@ export default function Atividade(props) {
                                                 provided={provided}
                                                 snapshot={snapshot}
                                                 descricao={item.descricao}
+                                                editar={() => editarAtividade(item)}
                                                 percentualConclusao={item.percentualConclusao}
                                                 removerAtividade={() => removerAtividade(item)}
                                             />
@@ -435,7 +451,7 @@ export default function Atividade(props) {
         </DragDropContext>
         <Modal
             open={openModal}
-            title='Nova atividade'
+            title='Atividade'
             onClose={closeModal}
             onSubmit={handleSubmitAtividade}
         >
