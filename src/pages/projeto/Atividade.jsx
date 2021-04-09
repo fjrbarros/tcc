@@ -3,7 +3,11 @@ import { useSelector } from 'react-redux';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { makeStyles, Box, Typography, IconButton, Tooltip } from '@material-ui/core';
 import { Modal, TextField, DateField, Form, CardAtividade } from '../../components/Index';
+import ListItem from '@material-ui/core/ListItem';
+import List from '@material-ui/core/List';
 import AddIcon from '@material-ui/icons/Add';
+import SaveIcon from '@material-ui/icons/Save';
+import DeleteIcon from '@material-ui/icons/Delete';
 import Api from '../../api/Index';
 import Swal from 'sweetalert2';
 import moment from 'moment';
@@ -31,7 +35,24 @@ const useStyles = makeStyles(theme => ({
         '& button': {
             marginBottom: '10px'
         }
-    }
+    },
+
+    listaTarefas: {
+        margin: 0,
+        padding: 0,
+        marginTop: '-10px',
+        '& li': {
+            padding: 0
+        }
+    },
+
+    buttonRemoverTarefa: {
+        marginBottom: '-24px',
+        padding: '10px',
+        '& svg': {
+            fontSize: '1.2rem'
+        }
+    },
 }));
 
 const reorder = (list, startIndex, endIndex) => {
@@ -84,8 +105,8 @@ function getListColor(text) {
 
 function getValuesAtividade(idUsuario) {
     return {
-        id: null,
         idUsuario,
+        id: '',
         descricao: '',
         detalhes: '',
         dataInicio: new Date(),
@@ -308,43 +329,80 @@ export default function Atividade(props) {
         const data = { descricao: valuesAtividade.descricao, detalhes: valuesAtividade.detalhes };
         validaForm(data, (campo, msg) => errors[campo] = msg);
         setErrorsAtividade(errors);
-        if (Object.keys(errors).length === 0) {
-            salvarAtividade();
+        if (Object.keys(errors).length !== 0) return;
+
+        if (valuesAtividade.id) {
+            atualizaAlteracoesAtividade();
+            return;
         }
+
+        salvarAtividade();
     }
 
     function validaForm(values, errorFn) {
-        if (!values.descricao.trim()) {
+        if (!values.descricao || !values.descricao.trim()) {
             errorFn('descricao', 'Descrição é obrigatório!')
         }
 
-        if (!values.detalhes.trim()) {
+        if (!values.detalhes || !values.detalhes.trim()) {
             errorFn('detalhes', 'Detalhes é obrigatório!')
         }
     }
 
-    function salvarAtividade() {
+    function atualizaAlteracoesAtividade() {
+        const data = getDataSalvar();
 
-        valuesAtividade.dataPrevistaInicio = moment(valuesAtividade.dataInicio).format('DD/MM/YYYY');
-        valuesAtividade.dataPrevistaTermino = moment(valuesAtividade.dataTermino).format('DD/MM/YYYY');
+        Api.put(`/projeto/${projeto.id}/atividade/${valuesAtividade.id}`, data)
+            .then(resp => cbSucces(resp))
+            .catch(error => cbError(error))
+    }
+
+    function salvarAtividade() {
+        const data = getDataSalvar();
+
+        Api.post(`/projeto/${projeto.id}/atividade`, data)
+            .then(resp => cbSucces(resp))
+            .catch(error => cbError(error))
+    }
+
+    function cbSucces(resp) {
+        atualizaAtividades(resp.data);
+        showToast('Dados salvos com sucesso!');
+        closeModal();
+    }
+
+    function cbError(error) {
+        showMessageError(`${error.response ? error.response.data.message : error.message}`);
+    }
+
+    function getDataSalvar() {
+        const data = {
+            dataPrevistaInicio: moment(valuesAtividade.dataInicio).format('DD/MM/YYYY'),
+            dataPrevistaTermino: moment(valuesAtividade.dataTermino).format('DD/MM/YYYY'),
+            descricao: valuesAtividade.descricao,
+            detalhes: valuesAtividade.detalhes,
+            idUsuario
+        };
 
         delete valuesAtividade.dataInicio;
         delete valuesAtividade.dataTermino;
 
-        Api.post(`/projeto/${projeto.id}/atividade`, valuesAtividade)
-            .then(resp => {
-                atualizaAtividades(resp.data);
-                showToast('Dados salvos com sucesso!');
-                closeModal();
-            })
-            .catch(error => showMessageError(`${error.response ? error.response.data.message : error.message}`));
+        return data;
     }
 
     function atualizaAtividades(data) {
         if (Object.keys(data).length === 0) return;
 
         const copyArray = [...atividade.to_do];
-        copyArray.splice(0, 0, data);
+
+        const index = copyArray.findIndex(obj => obj.id === data.id)
+
+        if (index >= 0) {
+            copyArray[index] = data;
+        } else {
+            copyArray.splice(0, 0, data);
+        }
+
         setAtividade({ ...atividade, to_do: copyArray });
     }
 
@@ -352,9 +410,9 @@ export default function Atividade(props) {
         setValuesAtividade({
             ...valuesAtividade,
             id: atividade.id,
-            descricao: atividade.descricao,
-            detalhes: atividade.detalhes,
-            tarefas: atividade.tarefas
+            descricao: atividade.descricao || '',
+            detalhes: atividade.detalhes || '',
+            tarefas: atividade.tarefas || []
         });
         setOpenModal(true);
     }
@@ -502,6 +560,58 @@ export default function Atividade(props) {
                         onChange={date => setValuesAtividade({ ...valuesAtividade, dataTermino: date })}
                     />
                 </Box>
+                <List className={classes.listaTarefas}>
+                    {
+                        valuesAtividade.id &&
+                        valuesAtividade.tarefas.map((item, index) => {
+                            return (
+                                <ListItem key={item.id || `key-${index}`}>
+                                    <Box
+                                        display='flex'
+                                        justifyContent='space-between'
+                                        alignItems='center'
+                                        width='100%'
+                                        padding='5px 0'
+                                    >
+                                        <TextField
+                                            style={{ width: '45%' }}
+                                            name='descricao'
+                                            label='Descrição'
+                                        // value={valuesAtividade.descricao}
+                                        // onChange={handleChangeAtividade}
+                                        // error={!!errorsAtividade.descricao}
+                                        // helperText={errorsAtividade.descricao}
+                                        />
+                                        <Box width='8%'></Box>
+                                        <DateField
+                                            style={{ width: '37%' }}
+                                            label='Data prevista término'
+                                            name='dataTermino'
+                                        // value={valuesAtividade.dataTermino}
+                                        // onChange={date => setValuesAtividade({ ...valuesAtividade, dataTermino: date })}
+                                        />
+                                        <Tooltip title='Remover' placement='bottom'>
+                                            <IconButton
+                                                className={classes.buttonRemoverTarefa}
+                                            // onClick={() => removeMembro(item, index)}
+                                            >
+                                                <DeleteIcon />
+                                            </IconButton>
+                                        </Tooltip>
+                                        <Tooltip title='Salvar' placement='bottom'>
+                                            <IconButton
+                                                className={classes.buttonRemoverTarefa}
+                                            // onClick={() => removeMembro(item, index)}
+                                            >
+                                                <SaveIcon />
+                                            </IconButton>
+                                        </Tooltip>
+                                    </Box>
+                                </ListItem>
+                            )
+                        })
+                    }
+                </List>
             </Form>
         </Modal>
     </>;
