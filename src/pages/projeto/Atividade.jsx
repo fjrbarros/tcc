@@ -46,16 +46,28 @@ const useStyles = makeStyles(theme => ({
         }
     },
 
-    buttonRemoverTarefa: {
+    btnActionsTarefa: {
         marginBottom: '-24px',
         padding: '10px',
         '& svg': {
             fontSize: '1.2rem'
         }
     },
+
+    adicionarNovaTarefa: {
+        display: 'flex',
+        justifyContent: 'flex-end',
+        alignItems: 'center',
+        marginTop: '10px',
+        '& p': {
+            marginRight: '10px',
+            fontStyle: 'italic',
+            fontSize: '17px'
+        }
+    }
 }));
 
-const reorder = (list, startIndex, endIndex) => {
+function reorder(list, startIndex, endIndex) {
     const result = Array.from(list);
     const [removed] = result.splice(startIndex, 1);
     result.splice(endIndex, 0, removed);
@@ -63,7 +75,7 @@ const reorder = (list, startIndex, endIndex) => {
     return result;
 };
 
-const move = (source, destination, droppableSource, droppableDestination) => {
+function move(source, destination, droppableSource, droppableDestination) {
     const sourceClone = Array.from(source);
     const destClone = Array.from(destination);
     const [removed] = sourceClone.splice(droppableSource.index, 1);
@@ -407,6 +419,13 @@ export default function Atividade(props) {
     }
 
     function editarAtividade(atividade) {
+        atividade.tarefas.forEach(tarefa => {
+            if (tarefa.dataPrevistaTermino) {
+                const dtTermino = tarefa.dataPrevistaTermino.split('/');
+                tarefa.dataPrevistaTermino = new Date(`${dtTermino[1]}/${dtTermino[0]}/${dtTermino[2]}`);
+            }
+        });
+
         setValuesAtividade({
             ...valuesAtividade,
             id: atividade.id,
@@ -415,6 +434,71 @@ export default function Atividade(props) {
             tarefas: atividade.tarefas || []
         });
         setOpenModal(true);
+    }
+
+    function adicionarNovaTarefa() {
+        const copyTarefas = getCopyArrayTarefas();
+
+        copyTarefas.push({ descricao: '', dataPrevistaTermino: '', idUsuario });
+
+        setTarefas(copyTarefas);
+    }
+
+    function handleChangeTarefaDescricao(event, index) {
+        const copyTarefas = getCopyArrayTarefas();
+
+        copyTarefas[index].descricao = event.target.value;
+
+        setTarefas(copyTarefas);
+    }
+
+    function handleChangeTarefaDate(date, index) {
+        const copyTarefas = getCopyArrayTarefas();
+
+        copyTarefas[index].dataPrevistaTermino = date;
+
+        setTarefas(copyTarefas);
+    }
+
+    function getCopyArrayTarefas() {
+        return [...valuesAtividade.tarefas];
+    }
+
+    function setTarefas(tarefas) {
+        setValuesAtividade({ ...valuesAtividade, tarefas });
+    }
+
+    function removeTarefa(tarefa, index) {
+        if (!tarefa.id) {
+            removeTarefaIndex(index);
+            return;
+        }
+
+        Api.delete(`/projeto/${projeto.id}/atividade/${valuesAtividade.id}/tarefa/${tarefa.id}`)
+            .then(() => removeTarefaIndex(index))
+            .catch(error => cbError(error));
+    }
+
+    function removeTarefaIndex(index) {
+        const copyTarefas = getCopyArrayTarefas();
+
+        copyTarefas.splice(index, 1);
+        setTarefas(copyTarefas);
+    }
+
+    function cadastrarTarefa(tarefa, index) {
+        const data = {
+            descricao: tarefa.descricao,
+            dataPrevistaTermino: moment(tarefa.dataPrevistaTermino).format('DD/MM/YYYY'),
+            idUsuario
+        };
+
+        if (tarefa.id) {
+        } else {
+            Api.post(`/projeto/${projeto.id}/atividade/${valuesAtividade.id}/tarefa`, data)
+                .then(() => showToast('Tarefa salva com sucesso!'))
+                .catch(error => cbError(error));
+        }
     }
 
     return <>
@@ -560,6 +644,17 @@ export default function Atividade(props) {
                         onChange={date => setValuesAtividade({ ...valuesAtividade, dataTermino: date })}
                     />
                 </Box>
+                {
+                    valuesAtividade.id &&
+                    <Box className={classes.adicionarNovaTarefa}>
+                        <Typography>
+                            Nova tarefa
+                        </Typography>
+                        <IconButton onClick={adicionarNovaTarefa}>
+                            <AddIcon />
+                        </IconButton>
+                    </Box>
+                }
                 <List className={classes.listaTarefas}>
                     {
                         valuesAtividade.id &&
@@ -577,31 +672,29 @@ export default function Atividade(props) {
                                             style={{ width: '45%' }}
                                             name='descricao'
                                             label='Descrição'
-                                        // value={valuesAtividade.descricao}
-                                        // onChange={handleChangeAtividade}
-                                        // error={!!errorsAtividade.descricao}
-                                        // helperText={errorsAtividade.descricao}
+                                            value={item.descricao}
+                                            onChange={event => handleChangeTarefaDescricao(event, index)}
                                         />
-                                        <Box width='8%'></Box>
+                                        <Box width='10%'></Box>
                                         <DateField
-                                            style={{ width: '37%' }}
+                                            style={{ width: '30%' }}
                                             label='Data prevista término'
                                             name='dataTermino'
-                                        // value={valuesAtividade.dataTermino}
-                                        // onChange={date => setValuesAtividade({ ...valuesAtividade, dataTermino: date })}
+                                            value={item.dataPrevistaTermino || new Date()}
+                                            onChange={date => handleChangeTarefaDate(date, index)}
                                         />
                                         <Tooltip title='Remover' placement='bottom'>
                                             <IconButton
-                                                className={classes.buttonRemoverTarefa}
-                                            // onClick={() => removeMembro(item, index)}
+                                                className={classes.btnActionsTarefa}
+                                                onClick={() => removeTarefa(item, index)}
                                             >
                                                 <DeleteIcon />
                                             </IconButton>
                                         </Tooltip>
                                         <Tooltip title='Salvar' placement='bottom'>
                                             <IconButton
-                                                className={classes.buttonRemoverTarefa}
-                                            // onClick={() => removeMembro(item, index)}
+                                                className={classes.btnActionsTarefa}
+                                                onClick={() => cadastrarTarefa(item, index)}
                                             >
                                                 <SaveIcon />
                                             </IconButton>
