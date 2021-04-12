@@ -487,9 +487,10 @@ export default function Atividade(props) {
     }
 
     function cadastrarTarefa(tarefa, index) {
+        const date = tarefa.dataPrevistaTermino || new Date();
         const data = {
             descricao: tarefa.descricao,
-            dataPrevistaTermino: moment(tarefa.dataPrevistaTermino).format('DD/MM/YYYY'),
+            dataPrevistaTermino: moment(date).format('DD/MM/YYYY'),
             idUsuario
         };
 
