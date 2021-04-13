@@ -12,7 +12,7 @@ const useStyles = makeStyles(theme => ({
         marginTop: theme.appHeader.toolbar.height + 5
     },
 
-    teste: {
+    containerChatList: {
         height: `calc(100vh - 118px)`,
         overflowY: 'auto',
     }
@@ -23,6 +23,10 @@ export default function Chat() {
     const dispatch = useDispatch();
     const open = useSelector(state => state.chatOpen.Open);
 
+    function handleClickConversa() {
+        
+    }
+
     return (
         <Drawer
             open={open}
@@ -31,8 +35,8 @@ export default function Chat() {
         >
             <Box>
                 <ChatHeader fecharChat={() => dispatch(fecharChat())} />
-                <Box className={classes.teste}>
-                    <ChatList />
+                <Box className={classes.containerChatList}>
+                    <ChatList onClickConversa={handleClickConversa}/>
                 </Box>
             </Box>
         </Drawer>
