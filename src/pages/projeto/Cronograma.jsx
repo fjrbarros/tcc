@@ -9,7 +9,7 @@ export default function Cronograma(props) {
     useEffect(() => {
         if (!projeto.id) return;
 
-        Api.post(`projeto/${projeto.id}/cronograma/listaAtividades`, { idUsuario })
+        Api.post(`projeto/${projeto.id}/cronograma/listaAtividades`, {idUsuario})
             .then(resp => console.log(resp.data))
     })
     return <div style={{ height: '100%' }}>Cronograma</div>

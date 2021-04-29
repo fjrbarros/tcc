@@ -420,7 +420,11 @@ export default function Atividade(props) {
 
     function editarAtividade(atividade) {
         atividade.tarefas.forEach(tarefa => {
-            if (tarefa.dataPrevistaTermino) {
+            if (!tarefa.dataPrevistaTermino) return;
+
+            const str = typeof tarefa.dataPrevistaTermino === 'string';
+
+            if (str) {
                 const dtTermino = tarefa.dataPrevistaTermino.split('/');
                 tarefa.dataPrevistaTermino = new Date(`${dtTermino[1]}/${dtTermino[0]}/${dtTermino[2]}`);
             }
